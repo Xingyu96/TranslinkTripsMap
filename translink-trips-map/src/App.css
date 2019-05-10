@@ -31,3 +31,14 @@
     transform: rotate(360deg);
   }
 }
+
+.parseCSV-axis {
+  font: 10px sans-serif;
+}
+
+.parseCSV-axis path,
+.parseCSV-axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}

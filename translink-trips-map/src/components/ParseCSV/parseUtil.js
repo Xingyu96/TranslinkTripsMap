@@ -29,3 +29,15 @@ function handleWebOrder(output, index) {
   output[index] = output[index].concat(output[index + 1]);
   output.splice(index + 1, 1);
 }
+
+export function getDaysOfWeek(csvArray){
+  let dayCount = [0, 0, 0, 0, 0, 0, 0];
+  for(let i = 0; i < csvArray.length; i++){
+    
+    let dayNum = new Date(csvArray[i][0]).getDay();
+    if (dayNum){
+      dayCount[dayNum]++;
+    }
+  }
+  return dayCount;
+}

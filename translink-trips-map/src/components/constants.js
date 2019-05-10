@@ -1,4 +1,4 @@
-export const APP_NAME = 'Translink Usage Tracker';
+export const APP_NAME = 'Compass Card Tracker';
 export const DEFAULT_COORD = {
   center: {
     lat: 49.2827,
