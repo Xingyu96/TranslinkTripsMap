@@ -1,13 +1,19 @@
 import React, { Component } from 'react';
+import Table from 'react-bootstrap/Table';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import { parseCSVToArray } from './parseUtil';
 
 class ParseCSV extends Component {
   constructor(props) {
     super(props);
     this.state = {
       tripFile: '',
+      tripArray: '',
+      fileName: ''
     };
 
-    this.handleFileInput = this.handleFileInput.bind(this);
     this.handleFileUpload = this.handleFileUpload.bind(this);
     this.handleTextAreaUpdate = this.handleTextAreaUpdate.bind(this);
 
@@ -16,42 +22,30 @@ class ParseCSV extends Component {
   }
 
   componentDidMount() {
-    this.handleFileInput();
-  }
 
-  handleFileInput() {
-    // let input = this.fileInput;
-    // let output = this.fileOutput;
-
-    // input.addEventListener('change', function () {
-    //   if (this.files && this.files[0]) {
-    //     let receivedFile = this.files[0];
-    //     let reader = new FileReader();
-
-    //     reader.addEventListener('load', function (e) {
-    //       output.textContent = e.target.result;
-    //     });
-
-    //     reader.readAsBinaryString(receivedFile);
-    //   }
-    // });
   }
 
   handleFileUpload(event) {
     event.preventDefault();
     let self = this;
 
-    if (this.fileInput.current.files && this.fileInput.current.files[0]){
+    if (this.fileInput.current.files && this.fileInput.current.files[0]) {
       console.log("selected file: " + this.fileInput.current.files[0].name);
       let receivedFile = this.fileInput.current.files[0];
       let fReader = new FileReader();
 
-      fReader.addEventListener('load', function(e){
-        self.setState({ tripFile: e.target.result });
+      fReader.addEventListener('load', function (e) {
+        let csv = e.target.result;
+        let parsedArray = parseCSVToArray(csv);
+        self.setState({
+          tripFile: csv,
+          tripArray: parsedArray,
+          fileName: receivedFile.name
+        });
       });
       fReader.readAsBinaryString(receivedFile);
     }
-    
+
   }
 
   handleTextAreaUpdate() {
@@ -61,9 +55,41 @@ class ParseCSV extends Component {
   render() {
     return (
       <div className="">
-        <input type="file" id="myFile" ref={this.fileInput} onChange={this.handleFileUpload} />
+        <Container>
+          <Row>
+            <Col md={{ span: 6, offset: 3 }}>
+
+              <div className="custom-file">
+                <input type="file" className="custom-file-input" id="customFileLang" ref={this.fileInput}
+                  onChange={this.handleFileUpload} />
+                <label className="custom-file-label" htmlFor="customFileLang" placeholder="upload file" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{this.state.fileName}</label>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+
         <hr />
-        <textarea style={{ width: '500px', height: '400px' }} id="output" ref={this.fileOutput} onChange={this.handleTextAreaUpdate} value={this.state.tripFile}></textarea>
+
+        {
+          this.state.tripArray &&
+          <Table striped bordered hover variant="dark">
+            <thead>
+              <tr>
+                {this.state.tripArray[0].map((columnName, index) => <th key={'col' + index}>{columnName}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {this.state.tripArray.map((row, index) =>
+                <tr key={'row' + index}>
+                  {
+                    index !== 0 &&
+                    row.map((rowItem, rowIndex) => <td key={'row' + index + 'col' + rowIndex}>{rowItem}</td>)
+                  }
+
+                </tr>)}
+            </tbody>
+          </Table>
+        }
       </div>
     );
   }

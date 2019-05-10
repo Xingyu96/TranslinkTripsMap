@@ -32,9 +32,8 @@ class App extends Component {
             {APP_NAME}
           </Navbar.Brand>
         </Navbar>
-        <div style={{height: '70vh'}}>
-          {/* <GoogleMap/> */}
-        </div>
+        {/* <div style={{height: '70vh'}}><GoogleMap/></div> */}
+        <hr/>
         <div>
           <ParseCSV/>
         </div>
