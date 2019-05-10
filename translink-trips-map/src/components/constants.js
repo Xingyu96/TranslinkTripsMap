@@ -7,3 +7,4 @@ export const DEFAULT_COORD = {
   zoom: 11
 };
 export const GMAP_API_KEY = 'AIzaSyBDvkef8wBUZkmHrWsIpi62yE70JrW-S0w';
+export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];

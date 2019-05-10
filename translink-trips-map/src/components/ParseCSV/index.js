@@ -3,8 +3,9 @@ import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { parseCSVToArray, getDaysOfWeek } from './parseUtil';
+import { parseCSVToArray, getDaysOfWeek, getUsageByHour } from './parseUtil';
 import UsageWeekly from '../UsageWeekly';
+import UsageByHour from '../UsageByHour';
 
 class ParseCSV extends Component {
   constructor(props) {
@@ -14,6 +15,7 @@ class ParseCSV extends Component {
       tripArray: '',
       fileName: '',
       usageByDayOfWeek: [],
+      usageByHour: [],
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
@@ -40,11 +42,13 @@ class ParseCSV extends Component {
         let csv = e.target.result;
         let parsedArray = parseCSVToArray(csv);
         let daysOfWeekCount = getDaysOfWeek(parsedArray);
+        let usageByHour = getUsageByHour(parsedArray);
         self.setState({
           tripFile: csv,
           tripArray: parsedArray,
           fileName: receivedFile.name,
           usageByDayOfWeek: daysOfWeekCount,
+          usageByHour: usageByHour,
         });
       });
       fReader.readAsBinaryString(receivedFile);
@@ -72,40 +76,24 @@ class ParseCSV extends Component {
             </Col>
           </Row>
         </Container>
-
+        
         <hr />
-        <h4>Usage By Days of the Week</h4>
-        {
-          this.state.tripArray &&
-          <Table striped bordered>
-            <thead>
-              <tr>
-                <th>Sunday</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-                <th>Saturday</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                {this.state.usageByDayOfWeek.map((dayNum, index) =>
-                  index < 7 &&
-                  <td key={'day' + index}>{dayNum}</td>
-                )}
-              </tr>
-            </tbody>
-          </Table>
-        }
-
-        <hr />
-        <h4>Usage by Days - Graph Version</h4>
-        {
-          this.state.tripArray &&
-          <UsageWeekly data={this.state.usageByDayOfWeek}/>
-        }
+        <Row>
+          <Col>
+            <h4>Usage By Days of the Week</h4>
+            {
+              this.state.tripArray &&
+              <UsageWeekly data={this.state.usageByDayOfWeek} />
+            }
+          </Col>
+          <Col>
+            <h4>Usage by Hour</h4>
+            {
+              this.state.tripArray &&
+              <UsageByHour data={this.state.usageByHour} />
+            }
+          </Col>
+        </Row>
         <hr/>
         <h4>CSV Details</h4>
         {

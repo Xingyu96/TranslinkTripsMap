@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 
-class UsageWeekly extends Component {
+class UsageByHour extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -35,7 +34,7 @@ class UsageWeekly extends Component {
     var width = this.state.width;
     var height = this.state.height;
 
-    var chart = d3.select(this.usageWeeklySVG)
+    var chart = d3.select(this.usageByHourSVG)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
@@ -65,7 +64,7 @@ class UsageWeekly extends Component {
       .text("# of times used");
     chart.append("text")
       .attr("transform", "translate(" + (width / 2) + "," + (height + margin.bottom - 5) + ")")
-      .text("Day of the week");
+      .text("Hour of day");
 
     this.setState({
       chart: chart,
@@ -74,8 +73,6 @@ class UsageWeekly extends Component {
       xAxis: xAxis,
       yAxis: yAxis,
       margin: margin,
-      width: width,
-      height: height,
     });
 
   }
@@ -91,8 +88,7 @@ class UsageWeekly extends Component {
     if (!chart) return;
 
     // set domain of x axis
-    //xChart.domain(DAYS);
-    xChart.domain(data.map(function (d, i) { console.log(i); return +i; }));
+    xChart.domain(data.map(function (d, i) { console.log(i); return i + ':00'; }));
 
     // set domain for y axis
     yChart.domain([0, d3.max(data, function (d) { return +d; })]);
@@ -100,11 +96,13 @@ class UsageWeekly extends Component {
     // get width of each bar
     var barWidth = this.state.width / data.length;
 
+    // exit bars
     var bars = chart.selectAll(".bar")
       .remove()
       .exit()
       .data(data);
 
+    // enter bars
     bars.enter().append("rect")
       .attr("class", "bar")
       .attr("x", function (d, i) { return i * barWidth + 1 })
@@ -119,8 +117,7 @@ class UsageWeekly extends Component {
         return "rgb(179, 205, 227)";
       });
 
-
-    // left axis
+    // set axes
     chart.select(".y").call(yAxis);
     chart.select('.x')
       .attr("transform", "translate(0," + height + ")")
@@ -129,29 +126,23 @@ class UsageWeekly extends Component {
 
   render() {
     return (
-      <div id="usageWeekly">
+      <div className="">
         {/* <Table striped bordered>
           <thead>
             <tr>
-              <th>{DAYS[6]}</th>
-              <th>{DAYS[0]}</th>
-              <th>{DAYS[1]}</th>
-              <th>{DAYS[2]}</th>
-              <th>{DAYS[3]}</th>
-              <th>{DAYS[4]}</th>
-              <th>{DAYS[5]}</th>
+              {this.props.data.map((hourCount, index) =>
+                <th key={'hour' + index}>{index + ':00'}</th>)}
             </tr>
           </thead>
           <tbody>
             <tr>
-              {this.props.data.map((dayNum, index) =>
-                index < 7 &&
-                <td key={'day' + index}>{dayNum}</td>
+              {this.props.data.map((hourCount, index) =>
+                <td key={'hourCount' + index}>{hourCount}</td>
               )}
             </tr>
           </tbody>
         </Table> */}
-        <svg width={this.state.width} height={this.state.height} ref={el => this.usageWeeklySVG = el}>
+        <svg width={this.state.width} height={this.state.height} ref={el => this.usageByHourSVG = el}>
 
         </svg>
       </div>
@@ -159,8 +150,4 @@ class UsageWeekly extends Component {
   }
 }
 
-UsageWeekly.propTypes = {
-  data: PropTypes.array
-}
-
-export default UsageWeekly;
+export default UsageByHour;

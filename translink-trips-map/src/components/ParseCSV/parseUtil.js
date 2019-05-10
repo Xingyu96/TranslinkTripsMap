@@ -41,3 +41,17 @@ export function getDaysOfWeek(csvArray){
   }
   return dayCount;
 }
+
+export function getUsageByHour(csvArray){
+  let hourCount = [];
+  for(let i = 0; i < 24; i++){
+    hourCount.push(0);
+  }
+  for(let i = 0; i < csvArray.length; i++){
+    let hourNum = new Date(csvArray[i][0]).getHours();
+    if(hourNum){
+      hourCount[hourNum]++;
+    }
+  }
+  return hourCount;
+}
