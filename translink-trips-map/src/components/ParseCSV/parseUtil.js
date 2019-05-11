@@ -106,3 +106,10 @@ function isTrip(input) {
   }
   return isTrip;
 }
+
+export function getStartAndEndDate(csvArray){
+  let startDate = csvArray[csvArray.length - 2][0];
+  let endDate = csvArray[1][0];
+
+  return [startDate, endDate];
+}

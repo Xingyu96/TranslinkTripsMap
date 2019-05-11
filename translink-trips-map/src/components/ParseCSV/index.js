@@ -3,7 +3,13 @@ import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { parseCSVToArray, getDaysOfWeek, getUsageByHour, sumByTransportType } from './parseUtil';
+import {
+  parseCSVToArray,
+  getDaysOfWeek,
+  getUsageByHour,
+  sumByTransportType,
+  getStartAndEndDate
+} from './parseUtil';
 import UsageWeekly from '../UsageWeekly';
 import UsageByHour from '../UsageByHour';
 
@@ -17,6 +23,8 @@ class ParseCSV extends Component {
       usageByDayOfWeek: [],
       usageByHour: [],
       sumTransportType: [],
+      startDate: '',
+      endDate: ''
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
@@ -45,6 +53,7 @@ class ParseCSV extends Component {
         let daysOfWeekCount = getDaysOfWeek(parsedArray);
         let usageByHour = getUsageByHour(parsedArray);
         let sumTransportType = sumByTransportType(parsedArray);
+        let startEndDate = getStartAndEndDate(parsedArray);
         self.setState({
           tripFile: csv,
           tripArray: parsedArray,
@@ -52,6 +61,8 @@ class ParseCSV extends Component {
           usageByDayOfWeek: daysOfWeekCount,
           usageByHour: usageByHour,
           sumTransportType: sumTransportType,
+          startDate: startEndDate[0],
+          endDate: startEndDate[1],
         });
       });
       fReader.readAsBinaryString(receivedFile);
@@ -81,6 +92,42 @@ class ParseCSV extends Component {
         </Container>
 
         <hr />
+        <Container>
+          <h4>Activity Breakdown</h4>
+          {this.state.tripArray &&
+            <div>
+              <Row>
+                <Table striped bordered>
+                  <thead>
+                    <tr>
+                      <th>Bus</th>
+                      <th>Tap in</th>
+                      <th>Transfer</th>
+                      <th>Tap out</th>
+                      <th>Purchase/Web Order</th>
+                      <th>Loaded</th>
+                      <th>Removed</th>
+                      <th>Uncategorized</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      {this.state.sumTransportType.map((transportCount, index) =>
+                        <td key={'transportCount' + index}>{transportCount}</td>
+                      )}
+                    </tr>
+                  </tbody>
+                </Table>
+
+              </Row>
+              <div>From {this.state.startDate} to {this.state.endDate} you have taken public transit {
+                this.state.sumTransportType[0] + this.state.sumTransportType[1] + this.state.sumTransportType[2]
+              } times.
+              </div>
+            </div>
+          }
+        </Container>
+        <hr />
         <Row>
           <Col>
             <h4>Trips By Days of the Week</h4>
@@ -97,36 +144,6 @@ class ParseCSV extends Component {
             }
           </Col>
         </Row>
-        <hr />
-        <Container>
-          <h4>Activity Breakdown</h4>
-          <Row>
-            {
-              this.state.tripArray &&
-              <Table striped bordered>
-                <thead>
-                  <tr>
-                    <th>Bus</th>
-                    <th>Tap in</th>
-                    <th>Transfer</th>
-                    <th>Tap out</th>
-                    <th>Purchase/Web Order</th>
-                    <th>Loaded</th>
-                    <th>Removed</th>
-                    <th>Uncategorized</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    {this.state.sumTransportType.map((transportCount, index) =>
-                      <td key={'transportCount' + index}>{transportCount}</td>
-                    )}
-                  </tr>
-                </tbody>
-              </Table>
-            }
-          </Row>
-        </Container>
         <hr />
         <h4>CSV Details</h4>
         {
