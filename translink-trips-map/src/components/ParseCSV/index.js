@@ -3,7 +3,7 @@ import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { parseCSVToArray, getDaysOfWeek, getUsageByHour } from './parseUtil';
+import { parseCSVToArray, getDaysOfWeek, getUsageByHour, sumByTransportType } from './parseUtil';
 import UsageWeekly from '../UsageWeekly';
 import UsageByHour from '../UsageByHour';
 
@@ -16,6 +16,7 @@ class ParseCSV extends Component {
       fileName: '',
       usageByDayOfWeek: [],
       usageByHour: [],
+      sumTransportType: [],
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
@@ -43,12 +44,14 @@ class ParseCSV extends Component {
         let parsedArray = parseCSVToArray(csv);
         let daysOfWeekCount = getDaysOfWeek(parsedArray);
         let usageByHour = getUsageByHour(parsedArray);
+        let sumTransportType = sumByTransportType(parsedArray);
         self.setState({
           tripFile: csv,
           tripArray: parsedArray,
           fileName: receivedFile.name,
           usageByDayOfWeek: daysOfWeekCount,
           usageByHour: usageByHour,
+          sumTransportType: sumTransportType,
         });
       });
       fReader.readAsBinaryString(receivedFile);
@@ -76,25 +79,55 @@ class ParseCSV extends Component {
             </Col>
           </Row>
         </Container>
-        
+
         <hr />
         <Row>
           <Col>
-            <h4>Usage By Days of the Week</h4>
+            <h4>Trips By Days of the Week</h4>
             {
               this.state.tripArray &&
               <UsageWeekly data={this.state.usageByDayOfWeek} />
             }
           </Col>
           <Col>
-            <h4>Usage by Hour</h4>
+            <h4>Trips by Hour</h4>
             {
               this.state.tripArray &&
               <UsageByHour data={this.state.usageByHour} />
             }
           </Col>
         </Row>
-        <hr/>
+        <hr />
+        <Container>
+          <h4>Activity Breakdown</h4>
+          <Row>
+            {
+              this.state.tripArray &&
+              <Table striped bordered>
+                <thead>
+                  <tr>
+                    <th>Bus</th>
+                    <th>Tap in</th>
+                    <th>Transfer</th>
+                    <th>Tap out</th>
+                    <th>Purchase/Web Order</th>
+                    <th>Loaded</th>
+                    <th>Removed</th>
+                    <th>Uncategorized</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {this.state.sumTransportType.map((transportCount, index) =>
+                      <td key={'transportCount' + index}>{transportCount}</td>
+                    )}
+                  </tr>
+                </tbody>
+              </Table>
+            }
+          </Row>
+        </Container>
+        <hr />
         <h4>CSV Details</h4>
         {
           this.state.tripArray &&

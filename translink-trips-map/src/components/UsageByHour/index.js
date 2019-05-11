@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
+import { LIGHT_BLUE } from '../constants';
 
 class UsageByHour extends Component {
   constructor(props) {
@@ -88,7 +89,7 @@ class UsageByHour extends Component {
     if (!chart) return;
 
     // set domain of x axis
-    xChart.domain(data.map(function (d, i) { console.log(i); return i + ':00'; }));
+    xChart.domain(data.map(function (d, i) { return i + ':00'; }));
 
     // set domain for y axis
     yChart.domain([0, d3.max(data, function (d) { return +d; })]);
@@ -114,7 +115,7 @@ class UsageByHour extends Component {
       .attr("y", function (d) { return yChart(d); })
       .attr("height", function (d) { return height - yChart(d); })
       .attr("fill", function (d) {
-        return "rgb(179, 205, 227)";
+        return LIGHT_BLUE;
       });
 
     // set axes

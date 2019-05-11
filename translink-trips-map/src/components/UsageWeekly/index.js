@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
+import { DAYS, LIGHT_BLUE } from '../constants';
 
 class UsageWeekly extends Component {
   constructor(props) {
@@ -44,7 +45,7 @@ class UsageWeekly extends Component {
     var xChart = d3.scaleBand().range([0, width]);
     var yChart = d3.scaleLinear().range([height, 0]);
 
-    var xAxis = d3.axisBottom(xChart);
+    var xAxis = d3.axisBottom(xChart).tickFormat(function (d, i) { return DAYS[i]; });
     var yAxis = d3.axisLeft(yChart).tickFormat(d3.format("d"));
 
     // set up axes
@@ -92,10 +93,11 @@ class UsageWeekly extends Component {
 
     // set domain of x axis
     //xChart.domain(DAYS);
-    xChart.domain(data.map(function (d, i) { console.log(i); return +i; }));
+    xChart.domain(data.map(function (d, i) { return +i; }));
 
     // set domain for y axis
     yChart.domain([0, d3.max(data, function (d) { return +d; })]);
+
 
     // get width of each bar
     var barWidth = this.state.width / data.length;
@@ -116,9 +118,8 @@ class UsageWeekly extends Component {
       .attr("y", function (d) { return yChart(d); })
       .attr("height", function (d) { return height - yChart(d); })
       .attr("fill", function (d) {
-        return "rgb(179, 205, 227)";
+        return LIGHT_BLUE;
       });
-
 
     // left axis
     chart.select(".y").call(yAxis);
@@ -135,7 +136,7 @@ class UsageWeekly extends Component {
             <tr>
               <th>{DAYS[6]}</th>
               <th>{DAYS[0]}</th>
-              <th>{DAYS[1]}</th>
+              <th>{DAYS[1]}</th>  
               <th>{DAYS[2]}</th>
               <th>{DAYS[3]}</th>
               <th>{DAYS[4]}</th>
