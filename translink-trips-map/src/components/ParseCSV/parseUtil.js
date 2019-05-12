@@ -65,9 +65,7 @@ export function sumByTransportType(csvArray) {
     let transactionItem = String(csvArray[i][1]);
 
     if (!isTrip(transactionItem)) {
-      if (transactionItem.includes('Tap out')) {
-        output[3]++;
-      } else if (transactionItem.includes('Purchase') || transactionItem.includes('Web Order')) {
+      if (transactionItem.includes('Purchase') || transactionItem.includes('Web Order')) {
         output[4]++;
       } else if (transactionItem.includes('Loaded')) {
         output[5]++;
@@ -78,8 +76,9 @@ export function sumByTransportType(csvArray) {
         console.log(transactionItem);
         output[7]++;
       }
-    }
-    else if (transactionItem.includes('Bus')) {
+    } else if (transactionItem.includes('Tap out')) {
+      output[3]++;
+    } else if (transactionItem.includes('Bus')) {
       output[0]++;
     } else if (transactionItem.includes('Stn')) {
       if (transactionItem.includes('Tap in')) {
@@ -101,15 +100,47 @@ function isTrip(input) {
   let isTrip = false;
   let transfer = 'Transfer';
   let tapIn = 'Tap in';
-  if (input.includes(transfer) || input.includes(tapIn)) {
+  let tapOut = 'Tap out';
+  if (input.includes(transfer) || input.includes(tapIn) || input.includes(tapOut)) {
     isTrip = true;
   }
   return isTrip;
 }
 
-export function getStartAndEndDate(csvArray){
+export function getStartAndEndDate(csvArray) {
   let startDate = csvArray[csvArray.length - 2][0];
   let endDate = csvArray[1][0];
 
   return [startDate, endDate];
+}
+
+export function getLocationCount(csvArray) {
+  let splitToken = ' at ';
+  let locationCount = {};
+  let sortableLocationCount = [];
+  let curLocation = '';
+  let splitLocationArray = [];
+  for (let i = 1; i < csvArray.length; i++) {
+    if (csvArray[i].length < 2) continue;
+
+    if (csvArray[i][1].includes(splitToken)) {
+      splitLocationArray = csvArray[i][1].split(splitToken);
+      curLocation = splitLocationArray[1];
+
+      if (locationCount.hasOwnProperty(curLocation)) {
+        locationCount[curLocation]++;
+      } else {
+        locationCount[curLocation] = 1;
+      }
+    }
+  }
+  for(let location in locationCount){
+    sortableLocationCount.push([location, locationCount[location]]);
+  }
+  sortByValueDescending(sortableLocationCount);
+  return sortableLocationCount;
+}
+
+export function sortByValueDescending(binaryArray){
+  binaryArray.sort(function(a,b){return b[1] - a[1]});
 }

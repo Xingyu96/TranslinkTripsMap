@@ -8,7 +8,8 @@ import {
   getDaysOfWeek,
   getUsageByHour,
   sumByTransportType,
-  getStartAndEndDate
+  getStartAndEndDate,
+  getLocationCount,
 } from './parseUtil';
 import UsageWeekly from '../UsageWeekly';
 import UsageByHour from '../UsageByHour';
@@ -24,7 +25,8 @@ class ParseCSV extends Component {
       usageByHour: [],
       sumTransportType: [],
       startDate: '',
-      endDate: ''
+      endDate: '',
+      locationCount: {},
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
@@ -54,6 +56,7 @@ class ParseCSV extends Component {
         let usageByHour = getUsageByHour(parsedArray);
         let sumTransportType = sumByTransportType(parsedArray);
         let startEndDate = getStartAndEndDate(parsedArray);
+        let locationCount = getLocationCount(parsedArray);
         self.setState({
           tripFile: csv,
           tripArray: parsedArray,
@@ -63,6 +66,7 @@ class ParseCSV extends Component {
           sumTransportType: sumTransportType,
           startDate: startEndDate[0],
           endDate: startEndDate[1],
+          locationCount: locationCount,
         });
       });
       fReader.readAsBinaryString(receivedFile);
@@ -120,9 +124,9 @@ class ParseCSV extends Component {
                 </Table>
 
               </Row>
-              <div>From {this.state.startDate} to {this.state.endDate} you have taken public transit {
+              <div>From <b>{this.state.startDate}</b> to <b>{this.state.endDate}</b> you have taken public transit <b>{
                 this.state.sumTransportType[0] + this.state.sumTransportType[1] + this.state.sumTransportType[2]
-              } times.
+              }</b> times.
               </div>
             </div>
           }
@@ -145,10 +149,33 @@ class ParseCSV extends Component {
           </Col>
         </Row>
         <hr />
+        <h4>Trips by Location</h4>
+        {
+          this.state.tripArray &&
+          <Container>
+            <Table striped bordered hover size="sm">
+              <thead>
+                <tr>
+                  <th>Location</th>
+                  <th># of Visits</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.locationCount.map((location) =>
+                  <tr key={'row' + location[0]}>
+                    <td>{location[0]}</td>
+                    <td>{location[1]}</td>
+                  </tr>)}
+              </tbody>
+            </Table>
+          </Container>
+        }
+
+        <hr />
         <h4>CSV Details</h4>
         {
           this.state.tripArray &&
-          <Table striped bordered hover variant="dark">
+          <Table striped bordered hover variant="dark" size="sm">
             <thead>
               <tr>
                 {this.state.tripArray[0].map((columnName, index) => <th key={'col' + index}>{columnName}</th>)}
