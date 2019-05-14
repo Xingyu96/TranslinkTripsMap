@@ -194,6 +194,5 @@ export function getBalance(csvArray) {
       balanceTimeSeries.push([new Date(csvArray[i][DATE_TIME]), balanceNum]);
     }
   }
-  console.log(balanceTimeSeries);
   return balanceTimeSeries;
 }

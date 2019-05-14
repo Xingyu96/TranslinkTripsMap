@@ -44,7 +44,6 @@ class BalanceTimeSeries extends Component {
     var datum = [];
     for (let i = 0; i < this.props.data.length; i++) {
       let item = this.props.data[i];
-      //console.log(item);
       if (this.props.data[i][0] && this.props.data[i][1] >= 0) {
         datum.push({
           date: item[0],
@@ -52,7 +51,6 @@ class BalanceTimeSeries extends Component {
         });
       }
     }
-    console.log(datum);
 
     // set up chart
     var margin = { top: 20, right: 20, bottom: 50, left: 40 };
@@ -71,7 +69,7 @@ class BalanceTimeSeries extends Component {
     this.formatXY(xChart, yChart, datum);
 
     var xAxis = d3.axisBottom(xChart);
-    xAxis.ticks(10).tickFormat(d3.timeFormat("%Y-%m-%d"));
+    xAxis.ticks(10).tickFormat(d3.timeFormat("%y-%m-%d"));
     var yAxis = d3.axisLeft(yChart).tickFormat(d3.format(".2f"));;
 
     // set up axes
@@ -131,7 +129,6 @@ class BalanceTimeSeries extends Component {
     var datum = [];
     for (let i = 0; i < this.props.data.length; i++) {
       let item = this.props.data[i];
-      //console.log(item);
       if (this.props.data[i][0] && this.props.data[i][1] >= 0) {
         datum.push({
           date: item[0],
@@ -139,7 +136,6 @@ class BalanceTimeSeries extends Component {
         });
       }
     }
-    console.log(datum);
 
     this.formatXY(xChart, yChart, datum);
 

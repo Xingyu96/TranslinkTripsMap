@@ -114,7 +114,7 @@ class ParseCSV extends Component {
                       <th>Bus</th>
                       <th>Station Tap in</th>
                       <th>Station Transfer</th>
-                      <th>StationTap out</th>
+                      <th>Station Tap out</th>
                       <th>Purchase/Web Order</th>
                       <th>Loaded</th>
                       <th>Removed</th>
@@ -188,7 +188,7 @@ class ParseCSV extends Component {
         {
           this.state.tripArray &&
           <div style={{ height: '80vh' }}>
-            {/* <GoogleMap/> */}
+            <GoogleMap locations={this.state.locationCount}/>
           </div>
         }
         <hr />
