@@ -1,3 +1,17 @@
+import {
+  DATE_TIME,
+  TRANSACTION,
+  PRODUCT,
+  LINE_ITEM,
+  AMOUNT,
+  BALANCE_DETAILS,
+  ORDER_DATE,
+  PAYMENT,
+  ORDER_NUMBER,
+  AUTH_CODE,
+  TOTAL,
+} from '../constants';
+
 export function parseCSVToArray(csvString) {
   let itemDelimiter = ',';
   let newLineDelimiter = '\n';
@@ -23,7 +37,7 @@ export function parseCSVToArray(csvString) {
 function handleWebOrder(output, index) {
   if (output[index].length !== 2) return output;
 
-  let combinedCell = output[index][1] + output[index + 1][0];
+  let combinedCell = output[index][TRANSACTION] + output[index + 1][0];
   output[index].splice(1, 1, combinedCell);
   output[index + 1].splice(0, 1);
   output[index] = output[index].concat(output[index + 1]);
@@ -34,7 +48,7 @@ export function getDaysOfWeek(csvArray) {
   let dayCount = [0, 0, 0, 0, 0, 0, 0];
   for (let i = 1; i < csvArray.length; i++) {
 
-    let dayNum = new Date(csvArray[i][0]).getDay();
+    let dayNum = new Date(csvArray[i][DATE_TIME]).getDay();
     if (dayNum) {
       dayCount[dayNum]++;
     }
@@ -48,7 +62,7 @@ export function getUsageByHour(csvArray) {
     hourCount.push(0);
   }
   for (let i = 1; i < csvArray.length; i++) {
-    let hourNum = new Date(csvArray[i][0]).getHours();
+    let hourNum = new Date(csvArray[i][DATE_TIME]).getHours();
     if (hourNum) {
       hourCount[hourNum]++;
     }
@@ -62,7 +76,7 @@ export function sumByTransportType(csvArray) {
   for (let i = 1; i < csvArray.length; i++) {
     if (csvArray[i].length < 2) continue;
 
-    let transactionItem = String(csvArray[i][1]);
+    let transactionItem = String(csvArray[i][TRANSACTION]);
 
     if (!isTrip(transactionItem)) {
       if (transactionItem.includes('Purchase') || transactionItem.includes('Web Order')) {
@@ -72,7 +86,7 @@ export function sumByTransportType(csvArray) {
       } else if (transactionItem.includes('Removed')) {
         output[6]++;
       } else {
-        console.log(csvArray[i]);
+        console.log("is not trip " + csvArray[i]);
         console.log(transactionItem);
         output[7]++;
       }
@@ -96,13 +110,36 @@ export function sumByTransportType(csvArray) {
   return output;
 }
 
-function isTrip(input) {
+function isTrip(input) { // includes missing tap out 
   let isTrip = false;
   let transfer = 'Transfer';
   let tapIn = 'Tap in';
   let tapOut = 'Tap out';
-  if (input.includes(transfer) || input.includes(tapIn) || input.includes(tapOut)) {
-    isTrip = true;
+  let busStop = 'Bus Stop';
+  let station = 'Stn';
+  let missing = 'Missing';
+  // has to be bus stop or stn
+  if (input.includes(busStop) || input.includes(station) || input.includes(missing)) {
+    // has to be transfer, tap in, or tap out
+    if (input.includes(transfer) || input.includes(tapIn) || input.includes(tapOut)) {
+      isTrip = true;
+    }
+  }
+  return isTrip;
+}
+
+function isStartTrip(input) { // does not include missing tap out
+  let isTrip = false;
+  let transfer = 'Transfer';
+  let tapIn = 'Tap in';
+  let busStop = 'Bus Stop';
+  let station = 'Stn';
+  // has to be bus stop or stn
+  if (input.includes(busStop) || input.includes(station)) {
+    // has to be transfer, tap in, or tap out
+    if (input.includes(transfer) || input.includes(tapIn)) {
+      isTrip = true;
+    }
   }
   return isTrip;
 }
@@ -122,9 +159,10 @@ export function getLocationCount(csvArray) {
   let splitLocationArray = [];
   for (let i = 1; i < csvArray.length; i++) {
     if (csvArray[i].length < 2) continue;
+    if (!isTrip(csvArray[i][TRANSACTION])) continue;
 
-    if (csvArray[i][1].includes(splitToken)) {
-      splitLocationArray = csvArray[i][1].split(splitToken);
+    if (csvArray[i][TRANSACTION].includes(splitToken)) {
+      splitLocationArray = csvArray[i][TRANSACTION].split(splitToken);
       curLocation = splitLocationArray[1];
 
       if (locationCount.hasOwnProperty(curLocation)) {
@@ -134,13 +172,28 @@ export function getLocationCount(csvArray) {
       }
     }
   }
-  for(let location in locationCount){
+  for (let location in locationCount) {
     sortableLocationCount.push([location, locationCount[location]]);
   }
   sortByValueDescending(sortableLocationCount);
   return sortableLocationCount;
 }
 
-export function sortByValueDescending(binaryArray){
-  binaryArray.sort(function(a,b){return b[1] - a[1]});
+export function sortByValueDescending(binaryArray) {
+  binaryArray.sort(function (a, b) { return b[1] - a[1] });
+}
+
+export function getBalance(csvArray) {
+  let balanceTimeSeries = [];
+  let balanceString = '';
+  let balanceNum = 0;
+  for (let i = 1; i < csvArray.length; i++) {
+    if (csvArray[i][BALANCE_DETAILS]) {
+      balanceString = csvArray[i][BALANCE_DETAILS];
+      balanceNum = Number(balanceString.slice(1, balanceString.length - 1));
+      balanceTimeSeries.push([new Date(csvArray[i][DATE_TIME]), balanceNum]);
+    }
+  }
+  console.log(balanceTimeSeries);
+  return balanceTimeSeries;
 }

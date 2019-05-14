@@ -10,9 +10,13 @@ import {
   sumByTransportType,
   getStartAndEndDate,
   getLocationCount,
+  getBalance,
 } from './parseUtil';
 import UsageWeekly from '../UsageWeekly';
 import UsageByHour from '../UsageByHour';
+import GoogleMap from '../GoogleMap';
+import BalanceTimeSeries from '../BalanceTimeSeries';
+import Alert from 'react-bootstrap/Alert';
 
 class ParseCSV extends Component {
   constructor(props) {
@@ -27,6 +31,7 @@ class ParseCSV extends Component {
       startDate: '',
       endDate: '',
       locationCount: {},
+      blanceTimeSeires: [],
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
@@ -57,6 +62,7 @@ class ParseCSV extends Component {
         let sumTransportType = sumByTransportType(parsedArray);
         let startEndDate = getStartAndEndDate(parsedArray);
         let locationCount = getLocationCount(parsedArray);
+        let blanceTimeSeires = getBalance(parsedArray);
         self.setState({
           tripFile: csv,
           tripArray: parsedArray,
@@ -67,6 +73,7 @@ class ParseCSV extends Component {
           startDate: startEndDate[0],
           endDate: startEndDate[1],
           locationCount: locationCount,
+          blanceTimeSeires: blanceTimeSeires,
         });
       });
       fReader.readAsBinaryString(receivedFile);
@@ -124,32 +131,37 @@ class ParseCSV extends Component {
                 </Table>
 
               </Row>
-              <div>From <b>{this.state.startDate}</b> to <b>{this.state.endDate}</b> you have taken public transit <b>{
-                this.state.sumTransportType[0] + this.state.sumTransportType[1] + this.state.sumTransportType[2]
-              }</b> times.
-              </div>
+              <Alert variant="info">
+                <Alert.Heading>Thanks for taking Public Transit!</Alert.Heading>
+                <hr/>
+                <div>From <b>{this.state.startDate}</b> to <b>{this.state.endDate}</b> you have taken public transit <b>{
+                  this.state.sumTransportType[0] + this.state.sumTransportType[1] + this.state.sumTransportType[2]
+                }</b> times.
+                </div>
+              </Alert>
+
             </div>
           }
         </Container>
-        <hr />
-        <Row>
-          <Col>
-            <h4>Trips By Days of the Week</h4>
-            {
-              this.state.tripArray &&
+        {
+          this.state.tripArray &&
+          <Row>
+            <Col>
+              <h4>Trips By Days of the Week</h4>
               <UsageWeekly data={this.state.usageByDayOfWeek} />
-            }
-          </Col>
-          <Col>
-            <h4>Trips by Hour</h4>
-            {
-              this.state.tripArray &&
+            </Col>
+            <Col>
+              <h4>Trips by Hour</h4>
               <UsageByHour data={this.state.usageByHour} />
-            }
-          </Col>
-        </Row>
+            </Col>
+            <Col>
+              <h4>Account Balance</h4>
+              <BalanceTimeSeries data={this.state.blanceTimeSeires} />
+            </Col>
+          </Row>
+        }
         <hr />
-        <h4>Trips by Location</h4>
+        <h4>Visited Locations</h4>
         {
           this.state.tripArray &&
           <Container>
@@ -172,6 +184,14 @@ class ParseCSV extends Component {
         }
 
         <hr />
+        <h4>Location Map</h4>
+        {
+          this.state.tripArray &&
+          <div style={{ height: '80vh' }}>
+            {/* <GoogleMap/> */}
+          </div>
+        }
+        <hr />
         <h4>CSV Details</h4>
         {
           this.state.tripArray &&
@@ -193,7 +213,7 @@ class ParseCSV extends Component {
             </tbody>
           </Table>
         }
-      </div>
+      </div >
     );
   }
 }

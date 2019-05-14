@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
-import { DAYS, LIGHT_BLUE } from '../constants';
+import { DAYS, LIGHT_BLUE, SVG_HEIGHT, SVG_WIDTH } from '../constants';
 
 class UsageWeekly extends Component {
   constructor(props) {
     super(props);
     this.state = {
       margin: null,
-      width: 700,
-      height: 400,
+      width: SVG_WIDTH,
+      height: SVG_HEIGHT,
       chart: null,
       xChart: null,
       yChart: null,
