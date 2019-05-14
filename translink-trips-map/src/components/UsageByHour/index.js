@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import { LIGHT_BLUE, SVG_HEIGHT, SVG_WIDTH } from '../constants';
+import { tickCountSetter } from '../d3Utils';
 
 class UsageByHour extends Component {
   constructor(props) {
@@ -45,7 +46,10 @@ class UsageByHour extends Component {
     var yChart = d3.scaleLinear().range([height, 0]);
 
     var xAxis = d3.axisBottom(xChart);
-    var yAxis = d3.axisLeft(yChart).tickFormat(d3.format("d"));
+    var yAxis = d3.axisLeft(yChart).tickFormat(function (e) {
+      if (Math.floor(e) !== e) { return; }
+      return e;
+    });
 
     // set up axes
     chart.append("g")
@@ -89,7 +93,7 @@ class UsageByHour extends Component {
     if (!chart) return;
 
     // set domain of x axis
-    xChart.domain(data.map(function (d, i) { 
+    xChart.domain(data.map(function (d, i) {
       return i;
     }));
 

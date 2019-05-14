@@ -15,13 +15,12 @@ class BalanceTimeSeries extends Component {
       yChart: null,
       xAxis: null,
       yAxis: null,
-      x: null,
-      y: null,
       datum: null,
     };
 
     this.createGraph = this.createGraph.bind(this);
     this.updateGraph = this.updateGraph.bind(this);
+    this.formatXY = this.formatXY.bind(this);
   }
 
   componentDidMount() {
@@ -33,7 +32,28 @@ class BalanceTimeSeries extends Component {
     this.updateGraph(this.props.data);
   }
 
+  formatXY(xChart, yChart, datum){
+    let yMax = d3.max(datum, function (d) { return d.value; });
+    if(yMax === 0) yMax = 1;
+    xChart.domain(d3.extent(datum, function (d) { return d.date; }));
+    yChart.domain([0, yMax]);
+  }
+
   createGraph() {
+    // set up datum
+    var datum = [];
+    for (let i = 0; i < this.props.data.length; i++) {
+      let item = this.props.data[i];
+      //console.log(item);
+      if (this.props.data[i][0] && this.props.data[i][1] >= 0) {
+        datum.push({
+          date: item[0],
+          value: item[1],
+        });
+      }
+    }
+    console.log(datum);
+
     // set up chart
     var margin = { top: 20, right: 20, bottom: 50, left: 40 };
     var width = this.state.width;
@@ -45,12 +65,14 @@ class BalanceTimeSeries extends Component {
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var xChart = d3.scaleBand().range([0, width]);
+    var xChart = d3.scaleTime().range([0, width]);
     var yChart = d3.scaleLinear().range([height, 0]);
 
+    this.formatXY(xChart, yChart, datum);
+
     var xAxis = d3.axisBottom(xChart);
-    xAxis.ticks(10);
-    var yAxis = d3.axisLeft(yChart).tickFormat(d3.format(".1"));;
+    xAxis.ticks(10).tickFormat(d3.timeFormat("%Y-%m-%d"));
+    var yAxis = d3.axisLeft(yChart).tickFormat(d3.format(".2f"));;
 
     // set up axes
     chart.append("g")
@@ -62,6 +84,7 @@ class BalanceTimeSeries extends Component {
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis)
       .selectAll("text")
+      .attr("transform", "rotate(-15)")
       .style("text-anchor", "end");
 
     // add labels
@@ -72,28 +95,9 @@ class BalanceTimeSeries extends Component {
       .attr("transform", "translate(" + (width / 2) + "," + (height + margin.bottom - 5) + ")")
       .text("Date");
 
-
-    var datum = [];
-    for (let i = 0; i < this.props.data.length; i++) {
-      let item = this.props.data[i];
-      //console.log(item);
-      if (this.props.data[i][0] && this.props.data[i][1]) {
-        datum.push({
-          date: item[0],
-          value: item[1],
-        });
-      }
-    }
-    console.log(datum);
-    var x = d3.scaleTime().range([0, width]);
-    var y = d3.scaleLinear().range([height, 0]);
-
-    x.domain(d3.extent(datum, function (d) { return d.date; }));
-    y.domain([0, d3.max(datum, function (d) { return d.value; })]);
-
     var line = d3.line()
-      .x(function (d, i) { return x(d.date); })
-      .y(function (d) { return y(d.value); });
+      .x(function (d, i) { return xChart(d.date); })
+      .y(function (d) { return yChart(d.value); });
     chart.append("path")
       .data([datum])
       .attr("class", "line")
@@ -109,8 +113,6 @@ class BalanceTimeSeries extends Component {
       xAxis: xAxis,
       yAxis: yAxis,
       margin: margin,
-      x: x,
-      y: y,
       datum: datum,
     });
 
@@ -121,8 +123,6 @@ class BalanceTimeSeries extends Component {
     var xAxis = this.state.xAxis;
     var yAxis = this.state.yAxis;
     var height = this.state.height;
-    var x = this.state.x;
-    var y = this.state.y;
     var xChart = this.state.xChart;
     var yChart = this.state.yChart;
 
@@ -132,7 +132,7 @@ class BalanceTimeSeries extends Component {
     for (let i = 0; i < this.props.data.length; i++) {
       let item = this.props.data[i];
       //console.log(item);
-      if (this.props.data[i][0] && this.props.data[i][1]) {
+      if (this.props.data[i][0] && this.props.data[i][1] >= 0) {
         datum.push({
           date: item[0],
           value: item[1],
@@ -141,12 +141,12 @@ class BalanceTimeSeries extends Component {
     }
     console.log(datum);
 
-    x.domain(d3.extent(datum, function (d) { return d.date; }));
-    y.domain([0, d3.max(datum, function (d) { return d.value; })]);
+    this.formatXY(xChart, yChart, datum);
 
     var line = d3.line()
-      .x(function (d, i) { return x(d.date); })
-      .y(function (d) { return y(d.value); });
+      .x(function (d, i) { return xChart(d.date); })
+      .y(function (d) { return yChart(d.value); })
+      .curve(d3.curveStep);
 
     chart.select(".line")
       .transition()
@@ -158,6 +158,7 @@ class BalanceTimeSeries extends Component {
     chart.select('.x')
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis);
+    chart.select(".x").selectAll("text").attr("transform", "rotate(-15)");
 
 
   }

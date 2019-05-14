@@ -112,9 +112,9 @@ class ParseCSV extends Component {
                   <thead>
                     <tr>
                       <th>Bus</th>
-                      <th>Tap in</th>
-                      <th>Transfer</th>
-                      <th>Tap out</th>
+                      <th>Station Tap in</th>
+                      <th>Station Transfer</th>
+                      <th>StationTap out</th>
                       <th>Purchase/Web Order</th>
                       <th>Loaded</th>
                       <th>Removed</th>
@@ -133,7 +133,7 @@ class ParseCSV extends Component {
               </Row>
               <Alert variant="info">
                 <Alert.Heading>Thanks for taking Public Transit!</Alert.Heading>
-                <hr/>
+                <hr />
                 <div>From <b>{this.state.startDate}</b> to <b>{this.state.endDate}</b> you have taken public transit <b>{
                   this.state.sumTransportType[0] + this.state.sumTransportType[1] + this.state.sumTransportType[2]
                 }</b> times.
