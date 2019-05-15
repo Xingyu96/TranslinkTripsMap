@@ -7,6 +7,24 @@ export const DEFAULT_COORD = {
   zoom: 11
 };
 
+export const BOUNDS = {
+  northwest: {
+    lat: 49.419930, 
+    lng: -123.389572
+  },
+  southeast:{
+    lat: 49.029974, 
+    lng: -122.221991
+  }
+}
+
+export const RECT_BOUNDS = {
+  north: 49.419930,
+  south: 49.029974,
+  east: -122.221991,
+  west: -123.389572,
+}
+
 // Google map
 export const GMAP_API_KEY = 'AIzaSyBDvkef8wBUZkmHrWsIpi62yE70JrW-S0w';
 

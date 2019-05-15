@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import GoogleMapReact from 'google-map-react';
-import { DEFAULT_COORD, GMAP_API_KEY, LIGHT_BLUE, DARK_BLUE } from '../constants';
+import { DEFAULT_COORD, GMAP_API_KEY, LIGHT_BLUE, DARK_BLUE, RECT_BOUNDS } from '../constants';
+import { wait } from '../ParseCSV/parseUtil';
 
 class GoogleMap extends Component {
   constructor(props) {
@@ -16,6 +17,7 @@ class GoogleMap extends Component {
 
     this.placesApiCallback = this.placesApiCallback.bind(this);
     this.handleMapUpdate = this.handleMapUpdate.bind(this);
+    this.performQueries = this.performQueries.bind(this);
   }
 
   componentDidMount() {
@@ -23,15 +25,19 @@ class GoogleMap extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.locations !== prevProps.locations) {
+    if (this.props !== prevProps) {
       this.handleMapUpdate();
     }
   }
 
-  placesApiCallback(results, status, request, maps, map, newMarkers) {
+  placesApiCallback(results, status, request, maps, map, newMarkers, itemNum, iteration) {
+
+    if (iteration >= 3) return;
+
     if (status === maps.places.PlacesServiceStatus.OK) {
+
       // console.log(results[0]);
-      console.log(results[0].name + " --> " + request.query + " count: " + request.usageCount);
+      console.log("item " + itemNum + " was found: " + results[0].name + " --> " + request.query + " count: " + request.usageCount);
       // console.log(request);
 
       let marker = new maps.Marker({
@@ -62,7 +68,10 @@ class GoogleMap extends Component {
       newMarkers.push(circle);
     }
     else {
-      console.log("not found! --> " + request.query);
+      console.log("iteration " + iteration + " item " + itemNum + " not found! --> " + request.query);
+      console.log(status);
+      wait(2000);
+      this.state.placesService.textSearch(request, (results, status) => this.placesApiCallback(results, status, request, maps, map, newMarkers, itemNum, iteration + 1));
     }
   }
 
@@ -75,18 +84,7 @@ class GoogleMap extends Component {
     let transitLayer = new maps.TransitLayer();
     transitLayer.setMap(map);
 
-    for (let i = 0; i < this.props.locations.length; i++) {
-      let location = this.props.locations[i][0];
-      // generate query object
-      let request = {
-        query: location,
-        usageCount: this.props.locations[i][1],
-        fields: ['name', 'geometry'],
-        location: DEFAULT_COORD.center,
-        rankby: 'distance'
-      };
-      placesService.textSearch(request, (results, status) => this.placesApiCallback(results, status, request, maps, map, newMarkers));
-    }
+    this.performQueries(maps, map, newMarkers, placesService);
 
     this.setState({
       map: map,
@@ -99,8 +97,30 @@ class GoogleMap extends Component {
   handleMapUpdate() {
     let newMarkers = [];
 
+    // clear previous markers
+    for (let i = 0; i < this.state.markers.length; i++) {
+      this.state.markers[i].setMap(null);
+    }
+
+    this.performQueries(this.state.maps, this.state.map, newMarkers, this.state.placesService);
+
+    this.setState({
+      markers: newMarkers,
+    })
+  }
+
+  performQueries(maps, map, newMarkers, placesService) {
     for (let i = 0; i < this.props.locations.length; i++) {
-      let location = this.props.locations[i][0];
+      let location = String(this.props.locations[i][0]);
+      // try to improve bus search result
+      // if(location.includes("Bus Stop")){
+      //   location = location.replace("Bus Stop", "Bus Stop Stop id");
+      // }
+
+      if (location.includes("Stn")) {
+        location = location.replace("Stn", "station");
+      }
+
       // generate query object
       let request = {
         query: location,
@@ -108,24 +128,11 @@ class GoogleMap extends Component {
         fields: ['name', 'geometry'],
         location: DEFAULT_COORD.center,
         rankby: 'distance',
-        types: [
-          'bus_station',
-          'subway_station',
-          'transit_station',
-          'train_station',
-        ],
+        locationBias: RECT_BOUNDS
       };
 
-      // clear previous markers
-      for (let i = 0; i < this.state.markers.length; i++) {
-        this.state.markers[i].setMap(null);
-      }
-      this.state.placesService.textSearch(request, (results, status) => this.placesApiCallback(results, status, request, this.state.maps, this.state.map, newMarkers));
+      placesService.textSearch(request, (results, status) => this.placesApiCallback(results, status, request, maps, map, newMarkers, i, 0));
     }
-
-    this.setState({
-      markers: newMarkers,
-    })
   }
 
   render() {

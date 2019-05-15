@@ -4,6 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
+/sampleData/gtfs
+/sampleData/gtfs.zip
 
 # testing
 /coverage
