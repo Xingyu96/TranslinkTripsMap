@@ -38,6 +38,7 @@ class ParseCSV extends Component {
       busStations: [],
       trainStations: [],
       otherStops: [],
+      arrayWithLocationDetail: [],
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
@@ -75,6 +76,10 @@ class ParseCSV extends Component {
       fReader.addEventListener('load', function (e) {
         let csv = e.target.result;
         let parsedArray = parseCSVToArray(csv);
+
+        let arrayWithLocationDetail = parsedArray;
+        parseDetailedLocation(parsedArray, self.state.busStations, self.state.trainStations, self.state.wceStations);
+
         let daysOfWeekCount = getDaysOfWeek(parsedArray);
         let usageByHour = getUsageByHour(parsedArray);
         let sumTransportType = sumByTransportType(parsedArray);
@@ -82,12 +87,12 @@ class ParseCSV extends Component {
         let locationCount = getLocationCount(parsedArray);
         let blanceTimeSeires = getBalance(parsedArray);
 
-        let withLocationDetail = parseDetailedLocation(parsedArray, self.state.busStations, self.state.transportCount, self.state.wceStations);
-        console.log(withLocationDetail);
+        console.log(parsedArray);
 
         self.setState({
           tripFile: csv,
           tripArray: parsedArray,
+          arrayWithLocationDetail: arrayWithLocationDetail,
           fileName: receivedFile.name,
           usageByDayOfWeek: daysOfWeekCount,
           usageByHour: usageByHour,
@@ -115,7 +120,7 @@ class ParseCSV extends Component {
         busStops.push(parseArr[i]);
       } else if (zn_id.includes("ZN")) {
         trainStations.push(parseArr[i]);
-      } else{
+      } else {
         wceStations.push(parseArr[i]);
       }
     }
@@ -235,7 +240,12 @@ class ParseCSV extends Component {
           <Table striped bordered hover variant="dark" size="sm">
             <thead>
               <tr>
-                {this.state.tripArray[0].map((columnName, index) => <th key={'col' + index}>{columnName}</th>)}
+                {this.state.tripArray[0].map((columnName, index) => {
+                  if (index !== 11) {
+                    return <th key={'col' + index}>{columnName}</th>
+                  }
+                  return null;
+                })}
               </tr>
             </thead>
             <tbody>
@@ -243,7 +253,21 @@ class ParseCSV extends Component {
                 <tr key={'row' + index}>
                   {
                     index !== 0 &&
-                    row.map((rowItem, rowIndex) => <td key={'row' + index + 'col' + rowIndex}>{rowItem}</td>)
+                    row.map((rowItem, rowIndex) => {
+                      if(rowIndex !== 11){
+                        if(rowIndex === 1){
+                          if (row[11]){
+                            let realStation = String(row[11].stop_name);
+                            let action = String(row[1].split('at')[0]);
+                            let correctedLocation = action + 'at ' + realStation;
+                            return <td key={'row' + index + 'col' + rowIndex}>{correctedLocation}</td>
+                          }
+                        }else{
+                          return <td key={'row' + index + 'col' + rowIndex}>{rowItem}</td>
+                        }
+                      }
+                      return null;
+                    })
                   }
 
                 </tr>)}

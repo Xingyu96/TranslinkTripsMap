@@ -163,8 +163,11 @@ export function getLocationCount(csvArray) {
 
     if (csvArray[i][TRANSACTION].includes(splitToken)) {
       splitLocationArray = csvArray[i][TRANSACTION].split(splitToken);
-      curLocation = splitLocationArray[1];
-
+      if (csvArray[i][11]) {
+        curLocation = String(csvArray[i][11].stop_name);
+      } else {
+        curLocation = splitLocationArray[1];
+      }
       if (locationCount.hasOwnProperty(curLocation)) {
         locationCount[curLocation]++;
       } else {
@@ -180,28 +183,55 @@ export function getLocationCount(csvArray) {
 }
 
 export function parseDetailedLocation(csvArray, busGTFS, trainGTFS, wceGTFS) {
-  let withLocationDetail = [];
-  withLocationDetail.push(csvArray[0]);
-  withLocationDetail[0].push("GTFS");
+  csvArray[0].push("GTFS");
 
   let splitToken = ' at ';
   let curLocation = '';
   let splitLocationArray = [];
-  let busStop = 'Bus Stop';
-  let station = 'Stn';
+  let busStop = 'Bus Stop ';
+  let station = ' Stn';
+  let curBusStopID = '';
+  let curStationName = '';
+  let transactionItem = '';
+  let platformToken = 'Platform';
+  let foundTrainStationName = '';
+  let foundBusStopID = '';
+
+  console.log(Number(busGTFS[3].stop_code));
+  console.log(trainGTFS);
 
   for (let i = 1; i < csvArray.length; i++) {
-    if (csvArray[i][TRANSACTION].includes(splitToken)) {
-      splitLocationArray = csvArray[i][TRANSACTION].split(splitToken);
+    transactionItem = String(csvArray[i][TRANSACTION]);
+    if (transactionItem.includes(splitToken)) {
+      splitLocationArray = transactionItem.split(splitToken);
       curLocation = splitLocationArray[1];
-      if(curLocation.includes(busStop)){
 
-      }else if(curLocation.includes(station)){
-        
+      if (curLocation.includes(busStop)) {
+        curBusStopID = Number(curLocation.split(busStop)[1]);
+        for (let j = 0; j < busGTFS.length; j++) {
+          foundBusStopID = Number(busGTFS[j].stop_code);
+          if (foundBusStopID === curBusStopID) {
+            console.log("bus stop id found: " + curBusStopID + " --> " + busGTFS[j].stop_name);
+            csvArray[i].push(busGTFS[j]);
+            break;
+          }
+        }
+      } else if (curLocation.includes(station)) {
+        curStationName = curLocation.split(station)[0];
+
+        for (let j = 0; j < trainGTFS.length; j++) {
+          foundTrainStationName = String(trainGTFS[j].stop_name);
+          if (foundTrainStationName.includes(curStationName) && !foundTrainStationName.includes(platformToken)) {
+            console.log("station identified: " + curStationName + " --> " + trainGTFS[j].stop_name);
+            csvArray[i].push(trainGTFS[j]);
+            break;
+          }
+        }
+      } else {
+        console.log("unidentified: " + curLocation);
       }
     }
   }
-  return withLocationDetail;
 }
 
 export function sortByValueDescending(binaryArray) {
