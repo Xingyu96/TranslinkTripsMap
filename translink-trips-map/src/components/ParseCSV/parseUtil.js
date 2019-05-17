@@ -168,10 +168,17 @@ export function getLocationCount(csvArray) {
       } else {
         curLocation = splitLocationArray[1];
       }
+
       if (locationCount.hasOwnProperty(curLocation)) {
-        locationCount[curLocation]++;
+        locationCount[curLocation].count++;
       } else {
-        locationCount[curLocation] = 1;
+        locationCount[curLocation] = {
+          count: 1,
+          stopDetail: null,
+        };
+        if (csvArray[i][11]) {
+          locationCount[curLocation].stopDetail = csvArray[i][11];
+        }
       }
     }
   }
@@ -197,9 +204,6 @@ export function parseDetailedLocation(csvArray, busGTFS, trainGTFS, wceGTFS) {
   let foundTrainStationName = '';
   let foundBusStopID = '';
 
-  console.log(Number(busGTFS[3].stop_code));
-  console.log(trainGTFS);
-
   for (let i = 1; i < csvArray.length; i++) {
     transactionItem = String(csvArray[i][TRANSACTION]);
     if (transactionItem.includes(splitToken)) {
@@ -211,7 +215,6 @@ export function parseDetailedLocation(csvArray, busGTFS, trainGTFS, wceGTFS) {
         for (let j = 0; j < busGTFS.length; j++) {
           foundBusStopID = Number(busGTFS[j].stop_code);
           if (foundBusStopID === curBusStopID) {
-            console.log("bus stop id found: " + curBusStopID + " --> " + busGTFS[j].stop_name);
             csvArray[i].push(busGTFS[j]);
             break;
           }
@@ -222,7 +225,6 @@ export function parseDetailedLocation(csvArray, busGTFS, trainGTFS, wceGTFS) {
         for (let j = 0; j < trainGTFS.length; j++) {
           foundTrainStationName = String(trainGTFS[j].stop_name);
           if (foundTrainStationName.includes(curStationName) && !foundTrainStationName.includes(platformToken)) {
-            console.log("station identified: " + curStationName + " --> " + trainGTFS[j].stop_name);
             csvArray[i].push(trainGTFS[j]);
             break;
           }
@@ -235,7 +237,7 @@ export function parseDetailedLocation(csvArray, busGTFS, trainGTFS, wceGTFS) {
 }
 
 export function sortByValueDescending(binaryArray) {
-  binaryArray.sort(function (a, b) { return b[1] - a[1] });
+  binaryArray.sort(function (a, b) { return b[1].count - a[1].count });
 }
 
 export function getBalance(csvArray) {

@@ -38,7 +38,6 @@ class ParseCSV extends Component {
       busStations: [],
       trainStations: [],
       otherStops: [],
-      arrayWithLocationDetail: [],
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
@@ -77,7 +76,6 @@ class ParseCSV extends Component {
         let csv = e.target.result;
         let parsedArray = parseCSVToArray(csv);
 
-        let arrayWithLocationDetail = parsedArray;
         parseDetailedLocation(parsedArray, self.state.busStations, self.state.trainStations, self.state.wceStations);
 
         let daysOfWeekCount = getDaysOfWeek(parsedArray);
@@ -92,7 +90,6 @@ class ParseCSV extends Component {
         self.setState({
           tripFile: csv,
           tripArray: parsedArray,
-          arrayWithLocationDetail: arrayWithLocationDetail,
           fileName: receivedFile.name,
           usageByDayOfWeek: daysOfWeekCount,
           usageByHour: usageByHour,
@@ -218,7 +215,7 @@ class ParseCSV extends Component {
                 {this.state.locationCount.map((location) =>
                   <tr key={'row' + location[0]}>
                     <td>{location[0]}</td>
-                    <td>{location[1]}</td>
+                    <td>{location[1].count}</td>
                   </tr>)}
               </tbody>
             </Table>
@@ -230,7 +227,7 @@ class ParseCSV extends Component {
         {
           this.state.tripArray &&
           <div style={{ height: '80vh' }}>
-            {/* <GoogleMap locations={this.state.locationCount}/> */}
+            <GoogleMap locations={this.state.locationCount}/>
           </div>
         }
         <hr />
