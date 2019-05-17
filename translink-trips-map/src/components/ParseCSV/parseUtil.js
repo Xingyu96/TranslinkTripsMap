@@ -179,6 +179,31 @@ export function getLocationCount(csvArray) {
   return sortableLocationCount;
 }
 
+export function parseDetailedLocation(csvArray, busGTFS, trainGTFS, wceGTFS) {
+  let withLocationDetail = [];
+  withLocationDetail.push(csvArray[0]);
+  withLocationDetail[0].push("GTFS");
+
+  let splitToken = ' at ';
+  let curLocation = '';
+  let splitLocationArray = [];
+  let busStop = 'Bus Stop';
+  let station = 'Stn';
+
+  for (let i = 1; i < csvArray.length; i++) {
+    if (csvArray[i][TRANSACTION].includes(splitToken)) {
+      splitLocationArray = csvArray[i][TRANSACTION].split(splitToken);
+      curLocation = splitLocationArray[1];
+      if(curLocation.includes(busStop)){
+
+      }else if(curLocation.includes(station)){
+        
+      }
+    }
+  }
+  return withLocationDetail;
+}
+
 export function sortByValueDescending(binaryArray) {
   binaryArray.sort(function (a, b) { return b[1] - a[1] });
 }
@@ -202,4 +227,8 @@ export function wait(ms) {
   var d2 = null;
   do { d2 = new Date(); }
   while (d2 - d < ms);
+}
+
+export function csvToGTFS(csvArray) {
+
 }

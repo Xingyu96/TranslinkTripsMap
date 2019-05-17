@@ -11,12 +11,15 @@ import {
   getStartAndEndDate,
   getLocationCount,
   getBalance,
+  parseDetailedLocation,
 } from './parseUtil';
 import UsageWeekly from '../UsageWeekly';
 import UsageByHour from '../UsageByHour';
 import GoogleMap from '../GoogleMap';
 import BalanceTimeSeries from '../BalanceTimeSeries';
 import Alert from 'react-bootstrap/Alert';
+import * as stopsJSON from '../../sampleData/gtfs/stopsJSON';
+
 
 class ParseCSV extends Component {
   constructor(props) {
@@ -32,17 +35,32 @@ class ParseCSV extends Component {
       endDate: '',
       locationCount: {},
       blanceTimeSeires: [],
+      busStations: [],
+      trainStations: [],
+      otherStops: [],
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
     this.handleTextAreaUpdate = this.handleTextAreaUpdate.bind(this);
+    this.separateBusAndTrain = this.separateBusAndTrain.bind(this);
 
     this.fileInput = React.createRef();
     this.fileOutput = React.createRef();
   }
 
   componentDidMount() {
+    let busStops = [];
+    let trainStations = [];
+    let wceStations = [];
+    let parseArr = Array(stopsJSON)[0].default;
 
+    this.separateBusAndTrain(parseArr, busStops, trainStations, wceStations);
+
+    this.setState({
+      busStations: busStops,
+      trainStations: trainStations,
+      wceStations: wceStations,
+    });
   }
 
   handleFileUpload(event) {
@@ -63,6 +81,10 @@ class ParseCSV extends Component {
         let startEndDate = getStartAndEndDate(parsedArray);
         let locationCount = getLocationCount(parsedArray);
         let blanceTimeSeires = getBalance(parsedArray);
+
+        let withLocationDetail = parseDetailedLocation(parsedArray, self.state.busStations, self.state.transportCount, self.state.wceStations);
+        console.log(withLocationDetail);
+
         self.setState({
           tripFile: csv,
           tripArray: parsedArray,
@@ -83,6 +105,21 @@ class ParseCSV extends Component {
 
   handleTextAreaUpdate() {
     console.log("text area updated!");
+  }
+
+  separateBusAndTrain(parseArr, busStops, trainStations, wceStations) {
+    let zn_id = '';
+    for (let i = 1; i < parseArr.length; i++) {
+      zn_id = String(parseArr[i].zone_id);
+      if (zn_id.includes("BUS ZN")) {
+        busStops.push(parseArr[i]);
+      } else if (zn_id.includes("ZN")) {
+        trainStations.push(parseArr[i]);
+      } else{
+        wceStations.push(parseArr[i]);
+      }
+    }
+    console.log("total: " + (parseArr.length - 1) + " found: " + (busStops.length + trainStations.length));
   }
 
   render() {
@@ -188,7 +225,7 @@ class ParseCSV extends Component {
         {
           this.state.tripArray &&
           <div style={{ height: '80vh' }}>
-            <GoogleMap locations={this.state.locationCount}/>
+            {/* <GoogleMap locations={this.state.locationCount}/> */}
           </div>
         }
         <hr />

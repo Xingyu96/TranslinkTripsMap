@@ -9,11 +9,11 @@ export const DEFAULT_COORD = {
 
 export const BOUNDS = {
   northwest: {
-    lat: 49.419930, 
+    lat: 49.419930,
     lng: -123.389572
   },
-  southeast:{
-    lat: 49.029974, 
+  southeast: {
+    lat: 49.029974,
     lng: -122.221991
   }
 }
@@ -51,3 +51,30 @@ export const LIGHT_BLUE = '#6CCEF5';
 // d3 svg
 export const SVG_HEIGHT = 300;
 export const SVG_WIDTH = 500;
+
+// gtfs 
+export const GTFS_COL_IND = {
+  stop_lat: 0,
+  stop_code: 1,
+  stop_lon: 2,
+  stop_id: 3,
+  stop_url: 4,
+  parent_station: 5,
+  stop_desc: 6,
+  stop_name: 7,
+  location_type: 8,
+  zone_id: 9
+}
+
+export const GTFS_COL_STR = {
+  stop_lat: "stop_lat",
+  stop_code: "stop_code",
+  stop_lon: "stop_lon",
+  stop_id: "stop_id",
+  stop_url: "stop_url",
+  parent_station: "parent_station",
+  stop_desc: 'stop_desc',
+  stop_name: "stop_name",
+  location_type: "location_type",
+  zone_id: "zone_id"
+}
