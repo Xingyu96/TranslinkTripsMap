@@ -19,7 +19,7 @@ You can view your account balance, which is recorded as a stepped line graph.
 It would be interesting to see which stops or stations you have visited the most. Surprisingly Google Maps would not be the best idea in this instance, since it does not provide bus stop ID search bias. Luckily, we can still geo-locate compass car usage with the help of static `GTFS` transit information, which is a standardized transit data model. We obtain Translink's `GTFS` information from `transitfeeds.com`, an open source website for transporation data.  Our app searches for keyword matches in stop information files in order to extract precise location coordinates, which is then mapped with Google Maps's Javascript mapping API.
 
 ### Animated Usage Map
-This component of the app animates each compass car instance with the help of google map and a playback UI to its side. You can play your usage chronologically, pause, and alter the playback speed..
+This component of the app animates each compass card usage chronologically with the help of google maps and a customized playback UI. You can play your usage, pause, and alter the playback speed.
 
 ## Next steps
 
