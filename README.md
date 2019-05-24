@@ -1,5 +1,4 @@
 # TranslinkTripsMap
--------------------
 This Tool is a side project developed mainly using the `react-bootstrap` and `d3.js` packages. Its initial goal is to categorize the trip data gathered from Translink's public compass card trip record service. Anyone who has purchassed and who uses a Translink compass card can associate it with an online account through Translink's website and access their compass card usage data. 
 
 I do not have any affiliation with Transklink, and updates to this package from me will be limited due to work.
@@ -8,7 +7,6 @@ I do not have any affiliation with Transklink, and updates to this package from 
 Once you clone this package, simply run `npm run start` in the main folder (`translink-trips-map/`). The server is defaulted to `localhost:3000`
 
 ## Features
------------
 So far, the available features are very basic, and new ones are still under work.
 
 ### Trip usage by hour and by day
@@ -24,8 +22,6 @@ It would be interesting to see which stops or stations you have visited the most
 This component of the app animates each compass car instance with the help of google map and a playback UI to its side. You can play your usage chronologically, pause, and alter the playback speed..
 
 ## Next steps
----------------
 
 
 ## Technical Details
---------------------
