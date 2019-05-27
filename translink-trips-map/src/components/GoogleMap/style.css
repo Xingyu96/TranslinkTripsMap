@@ -1,0 +1,9 @@
+.speedButton:focus {
+  background-color: grey;
+  color: white;
+}
+
+.activeSpeedButton {
+  background-color: grey;
+  color: white;
+}

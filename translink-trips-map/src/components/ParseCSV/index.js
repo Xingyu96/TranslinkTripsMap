@@ -200,6 +200,14 @@ class ParseCSV extends Component {
           </Row>
         }
         <hr />
+        <h4>Location Map</h4>
+        {
+          this.state.tripArray &&
+          <div style={{ height: '80vh' }}>
+            <GoogleMap locations={this.state.locationCount} />
+          </div>
+        }
+        <hr />
         <h4>Visited Locations</h4>
         {
           this.state.tripArray &&
@@ -223,14 +231,6 @@ class ParseCSV extends Component {
         }
 
         <hr />
-        <h4>Location Map</h4>
-        {
-          this.state.tripArray &&
-          <div style={{ height: '80vh' }}>
-            <GoogleMap locations={this.state.locationCount}/>
-          </div>
-        }
-        <hr />
         <h4>CSV Details</h4>
         {
           this.state.tripArray &&
@@ -251,15 +251,15 @@ class ParseCSV extends Component {
                   {
                     index !== 0 &&
                     row.map((rowItem, rowIndex) => {
-                      if(rowIndex !== 11){
-                        if(rowIndex === 1){
-                          if (row[11]){
+                      if (rowIndex !== 11) {
+                        if (rowIndex === 1) {
+                          if (row[11]) {
                             let realStation = String(row[11].stop_name);
                             let action = String(row[1].split('at')[0]);
                             let correctedLocation = action + 'at ' + realStation;
                             return <td key={'row' + index + 'col' + rowIndex}>{correctedLocation}</td>
                           }
-                        }else{
+                        } else {
                           return <td key={'row' + index + 'col' + rowIndex}>{rowItem}</td>
                         }
                       }
