@@ -264,3 +264,8 @@ export function wait(ms) {
 export function csvToGTFS(csvArray) {
 
 }
+
+export function dateNumberToString(dateNumber){
+  let parsedDate = new Date(Number(dateNumber));
+  return parsedDate.toLocaleString();
+}

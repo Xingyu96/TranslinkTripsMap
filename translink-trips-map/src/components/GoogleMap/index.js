@@ -1,16 +1,33 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import GoogleMapReact from 'google-map-react';
-import { DEFAULT_COORD, GMAP_API_KEY, LIGHT_BLUE, DARK_BLUE, RECT_BOUNDS } from '../constants';
+import {
+  DEFAULT_COORD,
+  GMAP_API_KEY,
+  LIGHT_BLUE,
+  DARK_BLUE,
+  RECT_BOUNDS,
+  TO_START,
+  PAUSE,
+  PLAY,
+  SPEED_1,
+  SPEED_2,
+  SPEED_3,
+  SPEED_4,
+} from '../constants';
 import { wait } from '../ParseCSV/parseUtil';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import './style.css';
 import playSVG from 'open-iconic/svg/media-play.svg';
+import { dateNumberToString } from '../ParseCSV/parseUtil';
 
 class GoogleMap extends Component {
   constructor(props) {
     super(props);
+    // refs
+    this.playBackStateButtonGroup = React.createRef();
+
     this.state = {
       date: new Date(),
       map: null,
@@ -19,7 +36,9 @@ class GoogleMap extends Component {
       placesService: null,
       playbackSpeed: 2,
       sliderValue: 0,
-      playState: "",
+      playState: 1,
+      parsedStartDate: 0,
+      parsedEndDate: 1,
     };
 
     this.placesApiCallback = this.placesApiCallback.bind(this);
@@ -28,10 +47,22 @@ class GoogleMap extends Component {
     this.locationSearch = this.locationSearch.bind(this);
     this.speedChange = this.speedChange.bind(this);
     this.sliderChange = this.sliderChange.bind(this);
+    this.sliderInput = this.sliderInput.bind(this);
     this.playStateChange = this.playStateChange.bind(this);
+    this.handleToStart = this.handleToStart.bind(this);
+    this.handlePause = this.handlePause.bind(this);
+    this.handlePlay = this.handlePlay.bind(this);
   }
 
   componentDidMount() {
+    let parsedStartDate = Date.parse(this.props.startDate);
+    let parsedEndDate = Date.parse(this.props.endDate);
+
+    this.setState({
+      parsedStartDate: parsedStartDate,
+      parsedEndDate: parsedEndDate,
+      sliderValue: parsedStartDate
+    });
 
   }
 
@@ -148,28 +179,69 @@ class GoogleMap extends Component {
   }
 
   speedChange(newSpeedEvent) {
-    console.log("clicked on speed " + newSpeedEvent.target.value);
     for (let i = 0; i < newSpeedEvent.target.parentElement.parentElement.children.length; i++) {
       newSpeedEvent.target.parentElement.parentElement.children[i].classList.remove("active");
     }
     newSpeedEvent.target.parentElement.classList.add("active");
     this.setState({
-      playbackSpeed: newSpeedEvent.target.value 
+      playbackSpeed: newSpeedEvent.target.value
     });
   }
 
   playStateChange(newPlayState) {
+    // set button styles
     for (let i = 0; i < newPlayState.target.parentElement.parentElement.children.length; i++) {
       newPlayState.target.parentElement.parentElement.children[i].classList.remove("active");
-      newPlayState.target.parentElement.classList.add("active");
-      this.setState({
-        playState: newPlayState.target.value
-      });
     }
+    newPlayState.target.parentElement.classList.add("active");
+
+    switch (Number(newPlayState.target.value)) {
+      case TO_START:
+        this.handleToStart();
+        break;
+      case PAUSE:
+        break;
+
+      case PLAY:
+        break;
+
+      default:
+        this.handleToStart();
+    }
+
+    this.setState({
+      playState: newPlayState.target.value
+    });
+  }
+
+  handleToStart() {
+    this.setState({
+      sliderValue: this.state.parsedStartDate
+    });
+  }
+
+  handlePause() {
+
+  }
+
+  handlePlay() {
+
   }
 
   sliderChange(sliderEvent) {
     this.setState({ sliderValue: sliderEvent.target.value });
+  }
+
+  sliderInput(sliderEvent) {
+    let playStateBtns = this.playBackStateButtonGroup.current;
+
+    for (let i = 0; i < playStateBtns.children.length; i++) {
+      playStateBtns.children[i].classList.remove("active");
+      
+    }
+    playStateBtns.children[PAUSE].classList.add("active");
+
+    this.setState({ playState: PAUSE });
   }
 
   render() {
@@ -181,24 +253,30 @@ class GoogleMap extends Component {
           <br></br>
           <div>
             <input id="mySlider"
+              className="playbackSlider"
               type="range"
               value={this.state.sliderValue}
-              min={0}
-              max={1000}
+              min={this.state.parsedStartDate}
+              max={this.state.parsedEndDate}
               onChange={this.sliderChange}
+              onInput={this.sliderInput}
               step={1}
               style={{ width: '100%' }} />
           </div>
+          <p>Start: {this.props.startDate} </p>
+          <p>End: {this.props.endDate} </p>
+          <p>Current: {dateNumberToString(this.state.sliderValue)} </p>
+
           <br />
-          <div className="btn-group btn-group-toggle">
+          <div className="btn-group btn-group-toggle" ref={this.playBackStateButtonGroup}>
             <label className="btn btn-outline-secondary">
-              <input type="radio" name="options" id="option1" value={1} onChange={this.playStateChange} /> <span className="oi oi-media-step-backward" title="icon name" aria-hidden="true"></span>
+              <input type="radio" name="options" id="option1" value={TO_START} onClick={this.playStateChange} /> <span className="oi oi-media-step-backward" title="icon name" aria-hidden="true"></span>
             </label>
             <label className="btn btn-outline-secondary active">
-              <input type="radio" name="options" id="option2" value={3} onChange={this.playStateChange} /> <span className="oi oi-media-pause" title="icon name" aria-hidden="true"></span>
+              <input type="radio" name="options" id="option2" value={PAUSE} onClick={this.playStateChange} /> <span className="oi oi-media-pause" title="icon name" aria-hidden="true"></span>
             </label>
             <label className="btn btn-outline-secondary">
-              <input type="radio" name="options" id="option1" value={2} onChange={this.playStateChange} /> <span className="oi oi-media-play" title="icon name" aria-hidden="true"></span>
+              <input type="radio" name="options" id="option1" value={PLAY} onClick={this.playStateChange} /> <span className="oi oi-media-play" title="icon name" aria-hidden="true"></span>
             </label>
           </div>
 
@@ -206,16 +284,16 @@ class GoogleMap extends Component {
 
           <div className="btn-group btn-group-toggle">
             <label className="btn btn-outline-secondary active">
-              <input type="radio" name="speed" id="option1" value={1} onChange={this.speedChange} /> 1 hr/s
+              <input type="radio" name="speed" id="option1" value={SPEED_1} onChange={this.speedChange} /> 1 hr/s
               </label>
             <label className="btn btn-outline-secondary">
-              <input type="radio" name="speed" id="option2" value={2} onChange={this.speedChange} /> 12 hr/s
+              <input type="radio" name="speed" id="option2" value={SPEED_2} onChange={this.speedChange} /> 12 hr/s
               </label>
             <label className="btn btn-outline-secondary">
-              <input type="radio" name="speed" id="option3" value={3} onChange={this.speedChange} /> 1 day/s
+              <input type="radio" name="speed" id="option3" value={SPEED_3} onChange={this.speedChange} /> 1 day/s
               </label>
             <label className="btn btn-outline-secondary">
-              <input type="radio" name="speed" id="option3" value={4} onChange={this.speedChange} /> 7 days/s
+              <input type="radio" name="speed" id="option3" value={SPEED_4} onChange={this.speedChange} /> 7 days/s
             </label>
           </div>
 
@@ -236,7 +314,10 @@ class GoogleMap extends Component {
 }
 
 GoogleMap.propTypes = {
-  locations: PropTypes.array
+  locations: PropTypes.array,
+  tripArray: PropTypes.array,
+  startDate: PropTypes.string,
+  endDate: PropTypes.string,
 };
 
 export default GoogleMap;

@@ -42,6 +42,16 @@ export const ORDER_NUMBER = 8;
 export const AUTH_CODE = 9;
 export const TOTAL = 10;
 
+// google map animation
+export const TO_START = 0;
+export const PAUSE = 1;
+export const PLAY = 2;
+
+export const SPEED_1 = 0;
+export const SPEED_2 = 1;
+export const SPEED_3 = 2;
+export const SPEED_4 = 3;
+
 // Colours
 export const DARK_GREY = 'rgb(52,58,64)';
 export const MEDIUM_GREY = '#43494E';
