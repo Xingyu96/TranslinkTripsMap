@@ -360,7 +360,7 @@ class GoogleMap extends Component {
 
 
         </Col>
-        <Col>
+        <Col className="mt-4 mt-lg-0">
           <GoogleMapReact
             bootstrapURLKeys={{ key: GMAP_API_KEY }}
             defaultCenter={DEFAULT_COORD.center}
