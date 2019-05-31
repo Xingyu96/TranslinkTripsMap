@@ -12,6 +12,7 @@ import {
   getLocationCount,
   getBalance,
   parseDetailedLocation,
+  getChronologicalTripArray,
 } from './parseUtil';
 import UsageWeekly from '../UsageWeekly';
 import UsageByHour from '../UsageByHour';
@@ -38,6 +39,7 @@ class ParseCSV extends Component {
       busStations: [],
       trainStations: [],
       otherStops: [],
+      chronologicalTrips: [],
     };
 
     this.handleFileUpload = this.handleFileUpload.bind(this);
@@ -84,8 +86,9 @@ class ParseCSV extends Component {
         let startEndDate = getStartAndEndDate(parsedArray);
         let locationCount = getLocationCount(parsedArray);
         let blanceTimeSeires = getBalance(parsedArray);
+        let chronoTrip = getChronologicalTripArray(parsedArray);
 
-        console.log(parsedArray);
+        //console.log(parsedArray);
 
         self.setState({
           tripFile: csv,
@@ -98,6 +101,7 @@ class ParseCSV extends Component {
           endDate: startEndDate[1],
           locationCount: locationCount,
           blanceTimeSeires: blanceTimeSeires,
+          chronologicalTrips: chronoTrip,
         });
       });
       fReader.readAsBinaryString(receivedFile);
@@ -175,7 +179,7 @@ class ParseCSV extends Component {
                 <hr />
                 <div>From <b>{this.state.startDate}</b> to <b>{this.state.endDate}</b> you have taken public transit <b>{
                   this.state.sumTransportType[0] + this.state.sumTransportType[1] + this.state.sumTransportType[2]
-                }</b> times.
+                }</b> times. Including card reload and online purchases, you have used your compass card a total of <b>{this.state.chronologicalTrips.length}</b> times.
                 </div>
               </Alert>
 
@@ -204,7 +208,7 @@ class ParseCSV extends Component {
         {
           this.state.tripArray &&
           <div>
-            <GoogleMap locations={this.state.locationCount} tripArray={this.state.tripArray} startDate={this.state.startDate} endDate={this.state.endDate} />
+            <GoogleMap locations={this.state.locationCount} chronologicalTrips={this.state.chronologicalTrips} startDate={this.state.startDate} endDate={this.state.endDate} />
           </div>
         }
         <hr />

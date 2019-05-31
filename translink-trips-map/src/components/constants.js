@@ -41,6 +41,22 @@ export const PAYMENT = 7;
 export const ORDER_NUMBER = 8;
 export const AUTH_CODE = 9;
 export const TOTAL = 10;
+export const GTFS = 11;
+
+export const COMPASSCSV = {
+  DATE_TIME: DATE_TIME,
+  TRANSACTION: TRANSACTION,
+  PRODUCT: PRODUCT,
+  LINE_ITEM: LINE_ITEM,
+  AMOUNT: AMOUNT,
+  BALANCE_DETAILS: BALANCE_DETAILS,
+  ORDER_DATE: ORDER_DATE,
+  PAYMENT: PAYMENT,
+  ORDER_NUMBER: ORDER_NUMBER,
+  AUTH_CODE: AUTH_CODE,
+  TOTAL: TOTAL,
+  GTFS: GTFS,
+}
 
 // google map animation
 export const TO_START = 0;

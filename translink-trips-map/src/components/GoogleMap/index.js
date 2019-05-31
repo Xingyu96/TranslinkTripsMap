@@ -10,11 +10,12 @@ import {
   PAUSE,
   PLAY,
   PLAYBACK,
+  COMPASSCSV
 } from '../constants';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import './style.css';
-import { dateNumberToString } from '../ParseCSV/parseUtil';
+import { dateNumberToString, } from '../ParseCSV/parseUtil';
 
 class GoogleMap extends Component {
   constructor(props) {
@@ -34,6 +35,7 @@ class GoogleMap extends Component {
       parsedStartDate: 0,
       parsedEndDate: 1,
       playIntervalFunc: null,
+      curTripCount: 0,
     };
 
     this.placesApiCallback = this.placesApiCallback.bind(this);
@@ -55,10 +57,13 @@ class GoogleMap extends Component {
     let parsedStartDate = Date.parse(this.props.startDate);
     let parsedEndDate = Date.parse(this.props.endDate);
 
+    console.log(this.props.locations);
+
     this.setState({
       parsedStartDate: parsedStartDate,
       parsedEndDate: parsedEndDate,
-      sliderValue: parsedStartDate
+      sliderValue: parsedStartDate,
+      curTripCount: 0,
     });
 
   }
@@ -74,7 +79,8 @@ class GoogleMap extends Component {
       this.setState({
         parsedStartDate: parsedStartDate,
         parsedEndDate: parsedEndDate,
-        sliderValue: parsedStartDate
+        sliderValue: parsedStartDate,
+        curTripCount: 0,
       });
     }
   }
@@ -149,12 +155,13 @@ class GoogleMap extends Component {
 
     this.performQueries(this.state.maps, this.state.map, newMarkers, this.state.placesService);
     this.sliderInputHalt();
-    
+
     this.setState({
       markers: newMarkers,
     })
   }
 
+  // for google maps api
   performQueries(maps, map, newMarkers, placesService) {
     for (let i = 0; i < this.props.locations.length; i++) {
       let location = String(this.props.locations[i][0]);
@@ -238,6 +245,7 @@ class GoogleMap extends Component {
     }
     this.setState({
       sliderValue: this.state.parsedStartDate,
+      curTripCount: 0,
     });
 
   }
@@ -279,10 +287,16 @@ class GoogleMap extends Component {
 
     // handle end of slider event, else increment slidervalue
     if (curSliderVal + incValue >= this.state.parsedEndDate) {
-      this.setState({ sliderValue: this.state.parsedEndDate });
+      this.setState({ sliderValue: this.state.parsedEndDate, curTripCount: this.props.chronologicalTrips.length });
       this.sliderInputHalt();
     } else {
-      this.setState({ sliderValue: curSliderVal + incValue });
+      let newSliderVal = curSliderVal + incValue;
+      let newCount = this.state.curTripCount;
+      if (Number(this.props.chronologicalTrips[this.state.curTripCount][COMPASSCSV.DATE_TIME]) <= Number(newSliderVal)) {
+        console.log("increment count to " + newCount);
+        newCount++;
+      }
+      this.setState({ sliderValue: newSliderVal, curTripCount: newCount });
     }
   }
 
@@ -297,7 +311,20 @@ class GoogleMap extends Component {
 
   sliderChange(sliderEvent) {
     // move slider to correct value
-    this.setState({ sliderValue: Number(sliderEvent.target.value) });
+    let newSliderVal = Number(sliderEvent.target.value);
+    let chronologicalTrips = this.props.chronologicalTrips;
+    let newTripCount = 0;
+    for (let i = 0; i < chronologicalTrips.length; i++) {
+      if (chronologicalTrips[i][COMPASSCSV.DATE_TIME] <= newSliderVal) {
+        newTripCount++;
+      } else {
+        break;
+      }
+    }
+    this.setState({
+      sliderValue: newSliderVal,
+      curTripCount: newTripCount,
+    });
   }
 
   sliderInputHalt() {
@@ -338,6 +365,7 @@ class GoogleMap extends Component {
           <p>Start: {this.props.startDate} </p>
           <p>End: {this.props.endDate} </p>
           <p>Current: {dateNumberToString(this.state.sliderValue)} </p>
+          <p>Trips taken to Date: {this.state.curTripCount}</p>
 
           <br />
           <div className="btn-group btn-group-toggle" ref={this.playBackStateButtonGroup}>
@@ -388,7 +416,7 @@ class GoogleMap extends Component {
 
 GoogleMap.propTypes = {
   locations: PropTypes.array,
-  tripArray: PropTypes.array,
+  chronologicalTrips: PropTypes.array,
   startDate: PropTypes.string,
   endDate: PropTypes.string,
 };
