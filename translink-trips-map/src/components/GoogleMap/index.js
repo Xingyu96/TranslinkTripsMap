@@ -208,6 +208,7 @@ class GoogleMap extends Component {
         this.handlePause();
         break;
       case PLAY:
+        this.clearSliderPlay();
         this.handlePlay(this.state.playbackSpeed);
         break;
       default:
