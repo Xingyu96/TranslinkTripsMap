@@ -42,7 +42,7 @@ class GoogleMap extends Component {
     this.locationSearch = this.locationSearch.bind(this);
     this.speedChange = this.speedChange.bind(this);
     this.sliderChange = this.sliderChange.bind(this);
-    this.sliderInput = this.sliderInput.bind(this);
+    this.sliderInputHalt = this.sliderInputHalt.bind(this);
     this.playStateChange = this.playStateChange.bind(this);
     this.handleToStart = this.handleToStart.bind(this);
     this.handlePause = this.handlePause.bind(this);
@@ -248,9 +248,7 @@ class GoogleMap extends Component {
   incrementSliderPlay(playSpeed) {
     // start interval play function
     let curSliderVal = this.state.sliderValue;
-    // console.log("playing at speed " + playSpeed + " -- " + curSliderVal);
     let incValue = PLAYBACK.SPEED_1_INC;
-
     switch (playSpeed) {
       case PLAYBACK.SPEED_1:
         incValue = PLAYBACK.SPEED_1_INC;
@@ -267,8 +265,14 @@ class GoogleMap extends Component {
       default:
         incValue = PLAYBACK.SPEED_1_INC;
     }
-    // console.log("increment: " + incValue);
-    this.setState({ sliderValue: curSliderVal + incValue });
+
+    // handle end of slider event, else increment slidervalue
+    if (curSliderVal + incValue >= this.state.parsedEndDate) {
+      this.setState({ sliderValue: this.state.parsedEndDate });
+      this.sliderInputHalt();
+    } else {
+      this.setState({ sliderValue: curSliderVal + incValue });
+    }
   }
 
   clearSliderPlay() {
@@ -285,7 +289,7 @@ class GoogleMap extends Component {
     this.setState({ sliderValue: Number(sliderEvent.target.value) });
   }
 
-  sliderInput(sliderEvent) {
+  sliderInputHalt() {
     // change to pause graphic
     let playStateBtns = this.playBackStateButtonGroup.current;
     for (let i = 0; i < playStateBtns.children.length; i++) {
@@ -316,7 +320,7 @@ class GoogleMap extends Component {
               min={this.state.parsedStartDate}
               max={this.state.parsedEndDate}
               onChange={this.sliderChange}
-              onInput={this.sliderInput}
+              onInput={this.sliderInputHalt}
               step={1}
               style={{ width: '100%' }} />
           </div>
