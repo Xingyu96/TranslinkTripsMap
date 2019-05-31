@@ -47,10 +47,17 @@ export const TO_START = 0;
 export const PAUSE = 1;
 export const PLAY = 2;
 
-export const SPEED_1 = 0;
-export const SPEED_2 = 1;
-export const SPEED_3 = 2;
-export const SPEED_4 = 3;
+export const PLAYBACK = {
+  SPEED_1: 0,
+  SPEED_2: 1,
+  SPEED_3: 2,
+  SPEED_4: 3,
+  SPEED_1_INC: 360000,
+  SPEED_2_INC: 4320000,
+  SPEED_3_INC: 4320000 * 2,
+  SPEED_4_INC: 4320000 * 14,
+  REFRESH_RATE: 100,
+}
 
 // Colours
 export const DARK_GREY = 'rgb(52,58,64)';

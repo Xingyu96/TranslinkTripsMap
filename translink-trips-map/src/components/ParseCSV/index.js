@@ -203,7 +203,7 @@ class ParseCSV extends Component {
         <h4>Location Map</h4>
         {
           this.state.tripArray &&
-          <div style={{ height: '80vh' }}>
+          <div>
             <GoogleMap locations={this.state.locationCount} tripArray={this.state.tripArray} startDate={this.state.startDate} endDate={this.state.endDate} />
           </div>
         }

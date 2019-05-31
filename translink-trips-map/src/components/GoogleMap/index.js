@@ -6,14 +6,10 @@ import {
   GMAP_API_KEY,
   LIGHT_BLUE,
   DARK_BLUE,
-  RECT_BOUNDS,
   TO_START,
   PAUSE,
   PLAY,
-  SPEED_1,
-  SPEED_2,
-  SPEED_3,
-  SPEED_4,
+  PLAYBACK,
 } from '../constants';
 import { wait } from '../ParseCSV/parseUtil';
 import Row from 'react-bootstrap/Row';
@@ -34,11 +30,12 @@ class GoogleMap extends Component {
       maps: null,
       markers: [],
       placesService: null,
-      playbackSpeed: 2,
+      playbackSpeed: 0,
       sliderValue: 0,
       playState: 1,
       parsedStartDate: 0,
       parsedEndDate: 1,
+      playIntervalFunc: null,
     };
 
     this.placesApiCallback = this.placesApiCallback.bind(this);
@@ -52,6 +49,8 @@ class GoogleMap extends Component {
     this.handleToStart = this.handleToStart.bind(this);
     this.handlePause = this.handlePause.bind(this);
     this.handlePlay = this.handlePlay.bind(this);
+    this.incrementSliderPlay = this.incrementSliderPlay.bind(this);
+    this.clearSliderPlay = this.clearSliderPlay.bind(this);
   }
 
   componentDidMount() {
@@ -183,9 +182,17 @@ class GoogleMap extends Component {
       newSpeedEvent.target.parentElement.parentElement.children[i].classList.remove("active");
     }
     newSpeedEvent.target.parentElement.classList.add("active");
+
+    let newSpeed = Number(newSpeedEvent.target.value);
     this.setState({
-      playbackSpeed: newSpeedEvent.target.value
+      playbackSpeed: newSpeed
     });
+
+    // clear current play function interval, start one at right speed
+    if (this.state.playState === PLAY) {
+      this.clearSliderPlay();
+      this.handlePlay(newSpeed);
+    }
   }
 
   playStateChange(newPlayState) {
@@ -200,47 +207,98 @@ class GoogleMap extends Component {
         this.handleToStart();
         break;
       case PAUSE:
+        this.handlePause();
         break;
-
       case PLAY:
+        this.handlePlay(this.state.playbackSpeed);
         break;
-
       default:
         this.handleToStart();
     }
 
     this.setState({
-      playState: newPlayState.target.value
+      playState: Number(newPlayState.target.value),
     });
   }
 
   handleToStart() {
+    let curPlayFunc = this.state.playIntervalFunc;
+    if (curPlayFunc) {
+      clearInterval(curPlayFunc);
+    }
     this.setState({
-      sliderValue: this.state.parsedStartDate
+      sliderValue: this.state.parsedStartDate,
     });
+
   }
 
   handlePause() {
-
+    // stop playing
+    this.clearSliderPlay();
   }
 
-  handlePlay() {
+  handlePlay(playSpeed) {
+    // move slider 
+    let funcRef = this.incrementSliderPlay;
+    let playFunc = setInterval(function () { funcRef(playSpeed); }, PLAYBACK.REFRESH_RATE);
+    this.setState({
+      playIntervalFunc: playFunc,
+    });
+  }
 
+  incrementSliderPlay(playSpeed) {
+    // start interval play function
+    let curSliderVal = this.state.sliderValue;
+    // console.log("playing at speed " + playSpeed + " -- " + curSliderVal);
+    let incValue = PLAYBACK.SPEED_1_INC;
+
+    switch (playSpeed) {
+      case PLAYBACK.SPEED_1:
+        incValue = PLAYBACK.SPEED_1_INC;
+        break;
+      case PLAYBACK.SPEED_2:
+        incValue = PLAYBACK.SPEED_2_INC;
+        break;
+      case PLAYBACK.SPEED_3:
+        incValue = PLAYBACK.SPEED_3_INC;
+        break;
+      case PLAYBACK.SPEED_4:
+        incValue = PLAYBACK.SPEED_4_INC;
+        break;
+      default:
+        incValue = PLAYBACK.SPEED_1_INC;
+    }
+    // console.log("increment: " + incValue);
+    this.setState({ sliderValue: curSliderVal + incValue });
+  }
+
+  clearSliderPlay() {
+    // clear interval play function
+    let curPlayFunc = this.state.playIntervalFunc;
+    if (curPlayFunc) {
+      clearInterval(curPlayFunc);
+      this.setState({ playIntervalFunc: null });
+    }
   }
 
   sliderChange(sliderEvent) {
-    this.setState({ sliderValue: sliderEvent.target.value });
+    // move slider to correct value
+    this.setState({ sliderValue: Number(sliderEvent.target.value) });
   }
 
   sliderInput(sliderEvent) {
+    // change to pause graphic
     let playStateBtns = this.playBackStateButtonGroup.current;
-
     for (let i = 0; i < playStateBtns.children.length; i++) {
       playStateBtns.children[i].classList.remove("active");
-      
+
     }
     playStateBtns.children[PAUSE].classList.add("active");
 
+    // stop playing
+    this.clearSliderPlay();
+
+    // set playstate to pause
     this.setState({ playState: PAUSE });
   }
 
@@ -284,16 +342,16 @@ class GoogleMap extends Component {
 
           <div className="btn-group btn-group-toggle">
             <label className="btn btn-outline-secondary active">
-              <input type="radio" name="speed" id="option1" value={SPEED_1} onChange={this.speedChange} /> 1 hr/s
+              <input type="radio" name="speed" id="option1" value={PLAYBACK.SPEED_1} onChange={this.speedChange} /> 1 hr/s
               </label>
             <label className="btn btn-outline-secondary">
-              <input type="radio" name="speed" id="option2" value={SPEED_2} onChange={this.speedChange} /> 12 hr/s
+              <input type="radio" name="speed" id="option2" value={PLAYBACK.SPEED_2} onChange={this.speedChange} /> 12 hr/s
               </label>
             <label className="btn btn-outline-secondary">
-              <input type="radio" name="speed" id="option3" value={SPEED_3} onChange={this.speedChange} /> 1 day/s
+              <input type="radio" name="speed" id="option3" value={PLAYBACK.SPEED_3} onChange={this.speedChange} /> 1 day/s
               </label>
             <label className="btn btn-outline-secondary">
-              <input type="radio" name="speed" id="option3" value={SPEED_4} onChange={this.speedChange} /> 7 days/s
+              <input type="radio" name="speed" id="option3" value={PLAYBACK.SPEED_4} onChange={this.speedChange} /> 7 days/s
             </label>
           </div>
 
@@ -306,6 +364,7 @@ class GoogleMap extends Component {
             defaultZoom={DEFAULT_COORD.zoom}
             yesIWantToUseGoogleMapApiInternals
             onGoogleApiLoaded={({ map, maps }) => this.handleApiLoaded(map, maps)}
+            style={{ height: '80vh' }}
           />
         </Col>
       </Row>
