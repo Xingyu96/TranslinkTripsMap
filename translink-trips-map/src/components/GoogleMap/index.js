@@ -66,6 +66,16 @@ class GoogleMap extends Component {
   componentDidUpdate(prevProps) {
     if (this.props !== prevProps) {
       this.handleMapUpdate();
+
+      let parsedStartDate = Date.parse(this.props.startDate);
+      let parsedEndDate = Date.parse(this.props.endDate);
+
+
+      this.setState({
+        parsedStartDate: parsedStartDate,
+        parsedEndDate: parsedEndDate,
+        sliderValue: parsedStartDate
+      });
     }
   }
 
@@ -138,7 +148,8 @@ class GoogleMap extends Component {
     }
 
     this.performQueries(this.state.maps, this.state.map, newMarkers, this.state.placesService);
-
+    this.sliderInputHalt();
+    
     this.setState({
       markers: newMarkers,
     })

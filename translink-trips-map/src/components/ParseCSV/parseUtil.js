@@ -12,6 +12,21 @@ import {
   TOTAL,
 } from '../constants';
 
+function tempFunc(){
+  let temp = {
+    PRODUCT,
+    LINE_ITEM,
+    ORDER_DATE,
+    PAYMENT,
+    ORDER_NUMBER,
+    AUTH_CODE,
+    TOTAL,
+    AMOUNT,
+  };
+
+  return temp;
+}
+
 export function parseCSVToArray(csvString) {
   let itemDelimiter = ',';
   let newLineDelimiter = '\n';
