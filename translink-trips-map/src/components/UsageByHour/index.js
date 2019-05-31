@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import { LIGHT_BLUE, SVG_HEIGHT, SVG_WIDTH } from '../constants';
-import { tickCountSetter } from '../d3Utils';
 
 class UsageByHour extends Component {
   constructor(props) {

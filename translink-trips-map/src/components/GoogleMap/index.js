@@ -11,11 +11,9 @@ import {
   PLAY,
   PLAYBACK,
 } from '../constants';
-import { wait } from '../ParseCSV/parseUtil';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import './style.css';
-import playSVG from 'open-iconic/svg/media-play.svg';
 import { dateNumberToString } from '../ParseCSV/parseUtil';
 
 class GoogleMap extends Component {
