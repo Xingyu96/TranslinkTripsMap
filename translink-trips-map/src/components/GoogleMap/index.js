@@ -10,7 +10,7 @@ import {
   PAUSE,
   PLAY,
   PLAYBACK,
-  COMPASSCSV
+  COMPASSCSV,
 } from '../constants';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -27,7 +27,8 @@ class GoogleMap extends Component {
       date: new Date(),
       map: null,
       maps: null,
-      markers: [],
+      tripMarkers: [],
+      tripPolygons: [],
       placesService: null,
       playbackSpeed: 0,
       sliderValue: 0,
@@ -51,6 +52,8 @@ class GoogleMap extends Component {
     this.handlePlay = this.handlePlay.bind(this);
     this.incrementSliderPlay = this.incrementSliderPlay.bind(this);
     this.clearSliderPlay = this.clearSliderPlay.bind(this);
+    this.handleRecalculateMarkers = this.handleRecalculateMarkers.bind(this);
+    this.handleIncrementMarkers = this.handleIncrementMarkers.bind(this);
   }
 
   componentDidMount() {
@@ -85,7 +88,7 @@ class GoogleMap extends Component {
     }
   }
 
-  placesApiCallback(result, status, request, maps, map, newMarkers, itemNum, iteration) {
+  placesApiCallback(result, status, request, maps, map, newMarkers, newPolygons, itemNum, iteration) {
 
     if (status === true) {
 
@@ -116,7 +119,7 @@ class GoogleMap extends Component {
       });
 
       newMarkers.push(marker);
-      newMarkers.push(circle);
+      newPolygons.push(circle);
     }
     else {
       console.log("iteration " + iteration + " item " + itemNum + " not found! --> " + request.query);
@@ -131,38 +134,46 @@ class GoogleMap extends Component {
 
     let placesService = new maps.places.PlacesService(map);
     let newMarkers = [];
+    let newPolygons = [];
 
     let transitLayer = new maps.TransitLayer();
     transitLayer.setMap(map);
 
-    this.performQueries(maps, map, newMarkers, placesService);
+    this.performQueries(maps, map, newMarkers, newPolygons, placesService);
 
     this.setState({
       map: map,
       maps: maps,
-      markers: newMarkers,
+      tripMarkers: newMarkers,
+      tripPolygons: newPolygons,
       placesService: placesService
     });
   };
 
   handleMapUpdate() {
     let newMarkers = [];
+    let newPolygons = [];
 
     // clear previous markers
-    for (let i = 0; i < this.state.markers.length; i++) {
-      this.state.markers[i].setMap(null);
+    for (let i = 0; i < this.state.tripMarkers.length; i++) {
+      this.state.tripMarkers[i].setMap(null);
+    }
+    for (let i = 0; i < this.state.tripPolygons.length; i++) {
+      this.state.tripPolygons[i].setMap(null);
     }
 
-    this.performQueries(this.state.maps, this.state.map, newMarkers, this.state.placesService);
+    this.performQueries(this.state.maps, this.state.map, newMarkers, newPolygons, this.state.placesService);
     this.sliderInputHalt();
 
     this.setState({
-      markers: newMarkers,
+      tripMarkers: newMarkers,
+      tripPolygons: newPolygons,
     })
   }
 
-  // for google maps api
-  performQueries(maps, map, newMarkers, placesService) {
+  // query location markers
+  performQueries(maps, map, newMarkers, newPolygons, placesService) {
+    console.log("perform location queries");
     for (let i = 0; i < this.props.locations.length; i++) {
       let location = String(this.props.locations[i][0]);
       // try to improve bus search result
@@ -181,7 +192,7 @@ class GoogleMap extends Component {
         stopDetail: this.props.locations[i][1].stopDetail,
       };
 
-      this.locationSearch(request, (results, status) => this.placesApiCallback(results, status, request, maps, map, newMarkers, i, 0));
+      this.locationSearch(request, (results, status) => this.placesApiCallback(results, status, request, maps, map, newMarkers, newPolygons, i, 0));
     }
   }
 
@@ -293,7 +304,7 @@ class GoogleMap extends Component {
       let newSliderVal = curSliderVal + incValue;
       let newCount = this.state.curTripCount;
       if (Number(this.props.chronologicalTrips[this.state.curTripCount][COMPASSCSV.DATE_TIME]) <= Number(newSliderVal)) {
-        console.log("increment count to " + newCount);
+        console.log("[incrementPlay] should update trip bubbles");
         newCount++;
       }
       this.setState({ sliderValue: newSliderVal, curTripCount: newCount });
@@ -321,6 +332,10 @@ class GoogleMap extends Component {
         break;
       }
     }
+    // recalculate and redraw map markders
+    console.log("[sliderChange] should update trip bubbles");
+    this.handleRecalculateMarkers(newSliderVal);
+
     this.setState({
       sliderValue: newSliderVal,
       curTripCount: newTripCount,
@@ -339,8 +354,50 @@ class GoogleMap extends Component {
     // stop playing
     this.clearSliderPlay();
 
+    // // recalculate and redraw map markders
+    // console.log("[sliderInputHalt] should update trip bubbles");
+    // this.handleRecalculateMarkers();
+
     // set playstate to pause
     this.setState({ playState: PAUSE });
+  }
+
+  handleRecalculateMarkers(newSliderVal) {
+    let tripMarkers = this.state.tripMarkers;
+    let tripPolygons = this.state.tripPolygons;
+
+    console.log(this.state.tripMarkers);
+    console.log(this.state.tripPolygons)
+    console.log(this.props.chronologicalTrips);
+    // first turn all markers off
+    for (let i = 0; i < this.state.tripPolygons.length; i++) {
+      tripMarkers[i].setMap(null);
+    }
+
+    for (let i = 0; i < this.state.tripMarkers.length; i++) {
+      tripPolygons[i].setMap(null);
+    }
+
+    // go through chronological trips, with current slider value as limit
+    // turn markers back on with correct sizes and texts
+    let updatedTripCount = {};
+    let curDateTime = null;
+    let curLocation = null;
+    for (let i = 0; i < this.props.chronologicalTrips.length; i++) {
+      let curDateTime = this.props.chronologicalTrips[i][COMPASSCSV.DATE_TIME];
+      let curLocation = this.props.chronologicalTrips[i][COMPASSCSV.GTFS];
+      if (newSliderVal < curDateTime) {
+        break;
+      } else {
+        console.log(this.props.chronologicalTrips[i]);
+        console.log(curLocation.stop_lon + " should be added! ");
+
+      }
+    }
+  }
+
+  handleIncrementMarkers() {
+
   }
 
   render() {

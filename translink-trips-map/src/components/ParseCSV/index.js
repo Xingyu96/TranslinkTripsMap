@@ -256,12 +256,19 @@ class ParseCSV extends Component {
                     index !== 0 &&
                     row.map((rowItem, rowIndex) => {
                       if (rowIndex !== 11) {
-                        if (rowIndex === 1) {
+                        if (rowIndex === 0) {
+                          let date = new Date(Number(row[0]));
+                          let dateString = date.toLocaleString();
+                          return <td key={'row' + index + 'col' + rowIndex}>{dateString}</td>
+
+                        } else if (rowIndex === 1) {
                           if (row[11]) {
                             let realStation = String(row[11].stop_name);
                             let action = String(row[1].split('at')[0]);
                             let correctedLocation = action + 'at ' + realStation;
                             return <td key={'row' + index + 'col' + rowIndex}>{correctedLocation}</td>
+                          } else {
+                            return <td key={'row' + index + 'col' + rowIndex}>{rowItem}</td>
                           }
                         } else {
                           return <td key={'row' + index + 'col' + rowIndex}>{rowItem}</td>
