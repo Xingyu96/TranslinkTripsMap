@@ -98,12 +98,11 @@ class GoogleMap extends Component {
         position: latLng,
         icon: { url: '', size: new maps.Size(0, 0), origin: new maps.Point(0, 0), anchor: new maps.Point(0, 0) },
         label: {
-          text: String(request.usageCount),
+          text: String(1),
           color: DARK_BLUE,
           fontSize: '1.5em',
           fontWeight: 'bold',
         },
-        map: map
       });
 
       let circle = new maps.Circle({
@@ -112,10 +111,9 @@ class GoogleMap extends Component {
         strokeWeight: 2,
         fillColor: LIGHT_BLUE,
         fillOpacity: 0.5,
-        map: map,
         center: latLng,
-        label: String(request.usageCount),
-        radius: Math.sqrt(request.usageCount) * 200
+        label: String(1),
+        radius: Math.sqrt(1) * 200
       });
 
       // attach stop id identifier
@@ -308,6 +306,7 @@ class GoogleMap extends Component {
       let newCount = this.state.curTripCount;
       if (Number(this.props.chronologicalTrips[this.state.curTripCount][COMPASSCSV.DATE_TIME]) <= Number(newSliderVal)) {
         console.log("[incrementPlay] should update trip bubbles");
+        this.handleRecalculateMarkers(Number(newSliderVal));
         newCount++;
       }
       this.setState({ sliderValue: newSliderVal, curTripCount: newCount });
@@ -424,7 +423,16 @@ class GoogleMap extends Component {
       for (let j = 0; j < this.state.tripMarkers.length; j++) {
         if (Number(keys[i]) == Number(this.state.tripMarkers[j].stop_id)) {
           // console.log("MATCH! update key " + keys[i] + "with value " + updatedTripCount[keys[i]].visitCount);
-          this.state.tripMarkers[j].setMap(this.state.map);
+          let visitCount = Number(updatedTripCount[keys[i]].visitCount);
+          visitCount++;
+          this.state.tripMarkers[j].setLabel({
+            text: String(visitCount),
+            color: DARK_BLUE,
+            fontSize: '1.5em',
+            fontWeight: 'bold',
+          });
+          this.state.tripPolygons[j].setRadius(Math.sqrt(visitCount) * 200);
+          //this.state.tripMarkers[j].setMap(this.state.map);
           this.state.tripPolygons[j].setMap(this.state.map);
         }
       }
@@ -432,8 +440,25 @@ class GoogleMap extends Component {
 
   }
 
-  handleIncrementMarkers() {
-
+  handleIncrementMarkers(curTripCount) {
+    console.log("should handle increment");
+    if (this.props.chronologicalTrips[curTripCount][COMPASSCSV.GTFS]) {
+      let stop_id = this.props.chronologicalTrips[curTripCount][COMPASSCSV.GTFS].stop_id;
+      for (let i = 0; i < this.state.tripPolygons.length; i++) {
+        if (this.state.tripPolygons[i].stop_id === stop_id) {
+          let visitCount = Number(this.state.tripMarkers[i].label.text);
+          this.state.tripMarkers[i].setLabel({
+            text: String(visitCount),
+            color: DARK_BLUE,
+            fontSize: '1.5em',
+            fontWeight: 'bold',
+          });
+          this.state.tripPolygons[i].setRadius(Math.sqrt(Number(visitCount)) * 200);
+          this.state.tripMarkers[i].setMap(this.state.map);
+          this.state.tripPolygons[i].setMap(this.state.map);
+        }
+      }
+    }
   }
 
   render() {

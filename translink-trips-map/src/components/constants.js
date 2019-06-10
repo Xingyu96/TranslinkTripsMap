@@ -25,9 +25,6 @@ export const RECT_BOUNDS = {
   west: -123.389572,
 }
 
-// Google map
-export const GMAP_API_KEY = 'AIzaSyBDvkef8wBUZkmHrWsIpi62yE70JrW-S0w';
-
 export const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export const DATE_TIME = 0;
