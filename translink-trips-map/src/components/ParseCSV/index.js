@@ -146,6 +146,14 @@ class ParseCSV extends Component {
         </Container>
 
         <hr />
+        <h4>Location Map</h4>
+        {
+          this.state.tripArray &&
+          <div>
+            <GoogleMap locations={this.state.locationCount} chronologicalTrips={this.state.chronologicalTrips} startDate={this.state.startDate} endDate={this.state.endDate} />
+          </div>
+        }
+        <hr />
         <Container>
           <h4>Activity Breakdown</h4>
           {this.state.tripArray &&
@@ -204,14 +212,7 @@ class ParseCSV extends Component {
           </Row>
         }
         <hr />
-        <h4>Location Map</h4>
-        {
-          this.state.tripArray &&
-          <div>
-            <GoogleMap locations={this.state.locationCount} chronologicalTrips={this.state.chronologicalTrips} startDate={this.state.startDate} endDate={this.state.endDate} />
-          </div>
-        }
-        <hr />
+
         <h4>Visited Locations</h4>
         {
           this.state.tripArray &&

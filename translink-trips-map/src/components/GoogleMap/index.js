@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import GoogleMapReact from 'google-map-react';
 import {
   DEFAULT_COORD,
-  GMAP_API_KEY,
   LIGHT_BLUE,
   DARK_BLUE,
   TO_START,
@@ -12,6 +11,7 @@ import {
   PLAYBACK,
   COMPASSCSV,
 } from '../constants';
+import { GMAP_API_KEY } from '../gmapKey';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import './style.css';
@@ -118,6 +118,9 @@ class GoogleMap extends Component {
         radius: Math.sqrt(request.usageCount) * 200
       });
 
+      // attach stop id identifier
+      marker.stop_id = result.stop_id;
+      circle.stop_id = result.stop_id;
       newMarkers.push(marker);
       newPolygons.push(circle);
     }
@@ -383,17 +386,50 @@ class GoogleMap extends Component {
     let updatedTripCount = {};
     let curDateTime = null;
     let curLocation = null;
+    let stopId = null;
+    let curGTFS = null;
+    let curLocationName = null;
     for (let i = 0; i < this.props.chronologicalTrips.length; i++) {
-      let curDateTime = this.props.chronologicalTrips[i][COMPASSCSV.DATE_TIME];
-      let curLocation = this.props.chronologicalTrips[i][COMPASSCSV.GTFS];
+      curDateTime = this.props.chronologicalTrips[i][COMPASSCSV.DATE_TIME];
+      curGTFS = this.props.chronologicalTrips[i][COMPASSCSV.GTFS];
+      curLocationName = this.props.chronologicalTrips[i][COMPASSCSV.LOC];
+
       if (newSliderVal < curDateTime) {
         break;
       } else {
-        console.log(this.props.chronologicalTrips[i]);
-        console.log(curLocation.stop_lon + " should be added! ");
+        // console.log(this.props.chronologicalTrips[i]);
+
+        // console.log(curLocation.stop_lon + " should be added! ");
+        if (curGTFS) {
+          // console.log(curGTFS.stop_id);
+          if (updatedTripCount[curGTFS.stop_id]) {
+            updatedTripCount[curGTFS.stop_id].visitCount++;
+          } else {
+            updatedTripCount[curGTFS.stop_id] = { visitCount: 1, latlng: { lat: curGTFS.stop_lat, lng: curGTFS.stop_lon } };
+          }
+        } else {
+          console.log("ERROR " + this.props.chronologicalTrips[i]);
+        }
 
       }
     }
+    let keys = Object.keys(updatedTripCount);
+    for (let i = 0; i < this.state.tripPolygons.length; i++) {
+      for (let j = 0; j < keys.length; j++) {
+        // console.log("potential: {lat: " + this.state.tripPolygons[i].center.lat() + " lng: " + this.state.tripPolygons[i].center.lng() + " }");
+      }
+    }
+    for (let i = 0; i < keys.length; i++) {
+      // console.log("key: " + keys[i] + " value: { lat: " + updatedTripCount[keys[i]].latlng.lat + " lng: " + updatedTripCount[keys[i]].latlng.lng + " } count: " + updatedTripCount[keys[i]].visitCount);
+      for (let j = 0; j < this.state.tripMarkers.length; j++) {
+        if (Number(keys[i]) == Number(this.state.tripMarkers[j].stop_id)) {
+          // console.log("MATCH! update key " + keys[i] + "with value " + updatedTripCount[keys[i]].visitCount);
+          this.state.tripMarkers[j].setMap(this.state.map);
+          this.state.tripPolygons[j].setMap(this.state.map);
+        }
+      }
+    }
+
   }
 
   handleIncrementMarkers() {
