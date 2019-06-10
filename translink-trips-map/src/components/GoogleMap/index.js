@@ -53,7 +53,6 @@ class GoogleMap extends Component {
     this.incrementSliderPlay = this.incrementSliderPlay.bind(this);
     this.clearSliderPlay = this.clearSliderPlay.bind(this);
     this.handleRecalculateMarkers = this.handleRecalculateMarkers.bind(this);
-    this.handleIncrementMarkers = this.handleIncrementMarkers.bind(this);
   }
 
   componentDidMount() {
@@ -255,6 +254,12 @@ class GoogleMap extends Component {
     if (curPlayFunc) {
       clearInterval(curPlayFunc);
     }
+    // first turn all markers off
+    for (let i = 0; i < this.state.tripPolygons.length; i++) {
+      this.state.tripMarkers[i].setMap(null);
+      this.state.tripPolygons[i].setMap(null);
+    }
+
     this.setState({
       sliderValue: this.state.parsedStartDate,
       curTripCount: 0,
@@ -368,15 +373,9 @@ class GoogleMap extends Component {
     let tripMarkers = this.state.tripMarkers;
     let tripPolygons = this.state.tripPolygons;
 
-    console.log(this.state.tripMarkers);
-    console.log(this.state.tripPolygons)
-    console.log(this.props.chronologicalTrips);
     // first turn all markers off
     for (let i = 0; i < this.state.tripPolygons.length; i++) {
       tripMarkers[i].setMap(null);
-    }
-
-    for (let i = 0; i < this.state.tripMarkers.length; i++) {
       tripPolygons[i].setMap(null);
     }
 
@@ -384,14 +383,10 @@ class GoogleMap extends Component {
     // turn markers back on with correct sizes and texts
     let updatedTripCount = {};
     let curDateTime = null;
-    let curLocation = null;
-    let stopId = null;
     let curGTFS = null;
-    let curLocationName = null;
     for (let i = 0; i < this.props.chronologicalTrips.length; i++) {
       curDateTime = this.props.chronologicalTrips[i][COMPASSCSV.DATE_TIME];
       curGTFS = this.props.chronologicalTrips[i][COMPASSCSV.GTFS];
-      curLocationName = this.props.chronologicalTrips[i][COMPASSCSV.LOC];
 
       if (newSliderVal < curDateTime) {
         break;
@@ -421,7 +416,7 @@ class GoogleMap extends Component {
     for (let i = 0; i < keys.length; i++) {
       // console.log("key: " + keys[i] + " value: { lat: " + updatedTripCount[keys[i]].latlng.lat + " lng: " + updatedTripCount[keys[i]].latlng.lng + " } count: " + updatedTripCount[keys[i]].visitCount);
       for (let j = 0; j < this.state.tripMarkers.length; j++) {
-        if (Number(keys[i]) == Number(this.state.tripMarkers[j].stop_id)) {
+        if (Number(keys[i]) === Number(this.state.tripMarkers[j].stop_id)) {
           // console.log("MATCH! update key " + keys[i] + "with value " + updatedTripCount[keys[i]].visitCount);
           let visitCount = Number(updatedTripCount[keys[i]].visitCount);
           visitCount++;
@@ -431,34 +426,13 @@ class GoogleMap extends Component {
             fontSize: '1.5em',
             fontWeight: 'bold',
           });
-          this.state.tripPolygons[j].setRadius(Math.sqrt(visitCount) * 200);
+          this.state.tripPolygons[j].setRadius(Math.sqrt(visitCount) * 300);
           //this.state.tripMarkers[j].setMap(this.state.map);
           this.state.tripPolygons[j].setMap(this.state.map);
         }
       }
     }
 
-  }
-
-  handleIncrementMarkers(curTripCount) {
-    console.log("should handle increment");
-    if (this.props.chronologicalTrips[curTripCount][COMPASSCSV.GTFS]) {
-      let stop_id = this.props.chronologicalTrips[curTripCount][COMPASSCSV.GTFS].stop_id;
-      for (let i = 0; i < this.state.tripPolygons.length; i++) {
-        if (this.state.tripPolygons[i].stop_id === stop_id) {
-          let visitCount = Number(this.state.tripMarkers[i].label.text);
-          this.state.tripMarkers[i].setLabel({
-            text: String(visitCount),
-            color: DARK_BLUE,
-            fontSize: '1.5em',
-            fontWeight: 'bold',
-          });
-          this.state.tripPolygons[i].setRadius(Math.sqrt(Number(visitCount)) * 200);
-          this.state.tripMarkers[i].setMap(this.state.map);
-          this.state.tripPolygons[i].setMap(this.state.map);
-        }
-      }
-    }
   }
 
   render() {
