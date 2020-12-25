@@ -3,8 +3,12 @@ This Tool is a side project developed mainly using the `react-bootstrap` and `d3
 
 I do not have any affiliation with Transklink, and updates to this package from me will be limited due to work.
 
-## Installation
-Once you clone this package, simply run `npm run start` in the main folder (`translink-trips-map/`). The server is defaulted to `localhost:3000`
+## How to run the tool on your localhost
+Follow these steps to run the tool and develop it on your own environment:
+- Clone the repository in a diretory of your choice
+- Once you clone this package, run `npm install` to install the necessary node packages
+- Run `npm run start` in the main folder `translink-trips-map/`. The server is defaulted to `localhost:3000`
+- Open a browser and navigate to `localhost:3000` to test the tool locally.
 
 ## Features
 So far, the available features are very basic, and new ones are still under work.
@@ -20,8 +24,3 @@ It would be interesting to see which stops or stations you have visited the most
 
 ### Animated Usage Map
 This component of the app animates each compass card usage chronologically with the help of google maps and a customized playback UI. You can play your usage, pause, and alter the playback speed.
-
-## Next steps
-
-
-## Technical Details
